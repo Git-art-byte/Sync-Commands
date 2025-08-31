@@ -1,7 +1,7 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))()
 
 local Window = Library:CreateWindow({
-    Title = "Combat UI",
+    Title = "Easy UI",
     Size = UDim2.fromOffset(600, 400),
     Transparency = 0.09,
     Blurring = true,
@@ -9,74 +9,191 @@ local Window = Library:CreateWindow({
 })
 
 -- Add sections
-Window:AddTabSection({Name = "Combat", Order = 1})
-Window:AddTabSection({Name = "Movement", Order = 2})
+Window:AddTabSection({
+    Name = "Player", 
+    Order = 1
+})
 
--- Add tabs
-local CombatTab = Window:AddTab({Title = "Aimbot", Section = "Combat"})
-local MovementTab = Window:AddTab({Title = "Speed", Section = "Movement"})
+Window:AddTabSection({
+    Name = "Visual", 
+    Order = 2
+})
 
--- Add components to Combat tab
-Window:AddSection({Name = "Aimbot Settings", Tab = CombatTab})
+Window:AddTabSection({
+    Name = "Fun", 
+    Order = 3
+})
+
+-- Add tabs with Lucide icons
+local PlayerTab = Window:AddTab({
+    Title = "Player", 
+    Section = "Player",
+    Icon = "user"
+})
+
+local VisualTab = Window:AddTab({
+    Title = "Visual", 
+    Section = "Visual",
+    Icon = "eye"
+})
+
+local FunTab = Window:AddTab({
+    Title = "Fun", 
+    Section = "Fun",
+    Icon = "sparkles"
+})
+
+-- Player Tab Components
+Window:AddSection({
+    Name = "Player Settings", 
+    Tab = PlayerTab
+})
 
 Window:AddToggle({
-    Title = "Enable Aimbot",
-    Description = "Toggle the aimbot system",
+    Title = "God Mode",
+    Description = "Makes you invincible",
     Default = false,
-    Tab = CombatTab,
+    Tab = PlayerTab,
     Callback = function(Value)
-        _G.AimbotEnabled = Value
+        if Value then
+            game.Players.LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+            game.Players.LocalPlayer.Character.Humanoid.Health = math.huge
+        else
+            game.Players.LocalPlayer.Character.Humanoid.MaxHealth = 100
+            game.Players.LocalPlayer.Character.Humanoid.Health = 100
+        end
     end
 })
 
 Window:AddSlider({
-    Title = "Aimbot FOV",
-    Description = "Field of view for target detection",
-    MaxValue = 360,
+    Title = "Walk Speed",
+    Description = "Change your movement speed",
+    MaxValue = 100,
     AllowDecimals = false,
-    Tab = CombatTab,
+    Tab = PlayerTab,
     Callback = function(Value)
-        _G.AimbotFOV = Value
-    end
-})
-
-Window:AddKeybind({
-    Title = "Aim Key",
-    Description = "Key to hold for aiming",
-    Tab = CombatTab,
-    Callback = function(Key)
-        _G.AimKey = Key
-    end
-})
-
--- Add components to Movement tab
-Window:AddSection({Name = "Movement Settings", Tab = MovementTab})
-
-Window:AddToggle({
-    Title = "Speed Hack",
-    Description = "Increase movement speed",
-    Default = false,
-    Tab = MovementTab,
-    Callback = function(Value)
-        _G.SpeedHack = Value
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
     end
 })
 
 Window:AddSlider({
-    Title = "Speed Multiplier",
-    Description = "How fast you want to go",
-    MaxValue = 10,
-    AllowDecimals = true,
-    DecimalAmount = 1,
-    Tab = MovementTab,
+    Title = "Jump Power",
+    Description = "Change your jump height",
+    MaxValue = 100,
+    AllowDecimals = false,
+    Tab = PlayerTab,
     Callback = function(Value)
-        _G.SpeedMultiplier = Value
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+    end
+})
+
+-- Visual Tab Components
+Window:AddSection({
+    Name = "Visual Effects", 
+    Tab = VisualTab
+})
+
+Window:AddToggle({
+    Title = "Fullbright",
+    Description = "Makes the whole game bright",
+    Default = false,
+    Tab = VisualTab,
+    Callback = function(Value)
+        if Value then
+            game.Lighting.Ambient = Color3.new(1, 1, 1)
+            game.Lighting.Brightness = 2
+        else
+            game.Lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+            game.Lighting.Brightness = 1
+        end
+    end
+})
+
+Window:AddToggle({
+    Title = "Hide Names",
+    Description = "Hides player names above heads",
+    Default = false,
+    Tab = VisualTab,
+    Callback = function(Value)
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Character then
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.DisplayName = Value and "" or player.Name
+                end
+            end
+        end
+    end
+})
+
+-- Fun Tab Components
+Window:AddSection({
+    Name = "Fun Stuff", 
+    Tab = FunTab
+})
+
+Window:AddButton({
+    Title = "Dance",
+    Description = "Makes your character dance",
+    Tab = FunTab,
+    Callback = function()
+        local humanoid = game.Players.LocalPlayer.Character.Humanoid
+        humanoid:LoadAnimation(Instance.new("Animation")):Play()
+        print("Dancing! 💃")
+    end
+})
+
+Window:AddButton({
+    Title = "Spin",
+    Description = "Makes your character spin",
+    Tab = FunTab,
+    Callback = function()
+        local root = game.Players.LocalPlayer.Character.HumanoidRootPart
+        for i = 1, 360, 10 do
+            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(10), 0)
+            wait(0.05)
+        end
+    end
+})
+
+Window:AddButton({
+    Title = "Float",
+    Description = "Makes your character float",
+    Tab = FunTab,
+    Callback = function()
+        local bodyForce = Instance.new("BodyForce")
+        bodyForce.Force = Vector3.new(0, 196.2, 0) -- Upward force
+        bodyForce.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+        wait(3)
+        bodyForce:Destroy()
+    end
+})
+
+-- Add a simple text box
+Window:AddInput({
+    Title = "Chat Message",
+    Description = "Type a message to chat",
+    Tab = FunTab,
+    Callback = function(Text)
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Text, "All")
     end
 })
 
 -- Show welcome notification
 Window:Notify({
     Title = "UI Loaded",
-    Description = "Combat UI has been successfully loaded!",
+    Description = "Example UI is ready!",
     Duration = 3
+})
+
+-- Add a final section with info
+Window:AddSection({
+    Name = "Information", 
+    Tab = PlayerTab
+})
+
+Window:AddParagraph({
+    Title = "Welcome!",
+    Description = "This is a exmaple UI with easy-to-use features. Enjoy!",
+    Tab = PlayerTab
 })
