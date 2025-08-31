@@ -1,6 +1,7 @@
 --[[
 	User Interface Library
 	Made by Late
+	Updated with Gotham Bold Font
 ]]
 
 --// Connections
@@ -21,6 +22,7 @@ local Setup = {
 	Transparency = 0.09,
 	ThemeMode = "ExtraDark",
 	Size = nil,
+	Font = Enum.Font.GothamBold,
 }
 
 local Theme = { --// (Dark Theme)
@@ -73,6 +75,11 @@ end
 local SetProperty = function(Object: Instance, Properties: {})
 	for Index, Property in next, Properties do
 		Object[Index] = (Property);
+	end
+
+	-- Auto-apply Gotham Bold font to all text objects
+	if Object:IsA("TextLabel") or Object:IsA("TextButton") or Object:IsA("TextBox") then
+		Object.Font = Setup.Font or Enum.Font.GothamBold
 	end
 
 	return Object
@@ -806,24 +813,28 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			["Title"] = function(Label)
 				if Label:IsA("TextLabel") then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
 			["Description"] = function(Label)
 				if Label:IsA("TextLabel") then
 					Label.TextColor3 = Theme.Description
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 			
 			["Section"] = function(Label)
 				if Label:IsA("TextLabel") then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
 			["Options"] = function(Label)
 				if Label:IsA("TextLabel") and Label.Parent.Name == "Main" then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 			
@@ -837,6 +848,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			["TextLabel"] = function(Label)
 				if Label:IsA("TextLabel") and Label.Parent:FindFirstChild("List") then
 					Label.TextColor3 = Theme.Tab
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
@@ -858,6 +870,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 					end
 				elseif Label:FindFirstChild("Padding") then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
@@ -876,10 +889,12 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			["Input"] = function(Label)
 				if Label:IsA("TextLabel") then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				elseif Label:FindFirstChild("Labels") then
 					Label.BackgroundColor3 = Theme.Component
 				elseif Label:IsA("TextBox") and Label.Parent.Name == "Main" then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
@@ -910,6 +925,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			["TextLabel"] = function(Label)
 				if Label:FindFirstChild("Padding") then
 					Label.TextColor3 = Theme.Title
+					Label.Font = Setup.Font or Enum.Font.GothamBold
 				end
 			end,
 
@@ -917,6 +933,11 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 				if Label:FindFirstChild("Labels") then
 					Label.BackgroundColor3 = Theme.Component
 				end
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end,
+
+			["TextBox"] = function(Label)
+				Label.Font = Setup.Font or Enum.Font.GothamBold
 			end,
 
 			["ScrollingFrame"] = function(Label)
@@ -935,6 +956,11 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		for Index, Descendant in next, Screen:GetDescendants() do
 			local Name, Class =  Themes.Names[Descendant.Name],  Themes.Classes[Descendant.ClassName]
 
+			-- Apply Gotham Bold font to all text objects
+			if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") or Descendant:IsA("TextBox") then
+				Descendant.Font = Setup.Font or Enum.Font.GothamBold
+			end
+
 			if Name then
 				Name(Descendant);
 			elseif Class then
@@ -943,9 +969,22 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		end
 	end
 
+	-- Font management function
+	function Options:SetFont(fontType)
+		fontType = fontType or Enum.Font.GothamBold
+		Setup.Font = fontType
+		
+		-- Change font for all existing text objects
+		for Index, Descendant in next, Screen:GetDescendants() do
+			if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") or Descendant:IsA("TextBox") then
+				Descendant.Font = fontType
+			end
+		end
+	end
+
 	--// Changing Settings
 
-	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme
+	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme, Font
 		if Setting == "Size" then
 			
 			Window.Size = Value
@@ -987,6 +1026,10 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			
 			Options:SetTheme(Value)
 			
+		elseif Setting == "Font" then
+			
+			Options:SetFont(Value)
+			
 		elseif Setting == "Keybind" then
 			
 			Setup.Keybind = Value
@@ -1001,5 +1044,25 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 	return Options
 end
+
+-- Auto-font changer for existing and new objects
+task.spawn(function()
+	while Screen do
+		for _, obj in pairs(Screen:GetDescendants()) do
+			if (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) and obj.Font ~= (Setup.Font or Enum.Font.GothamBold) then
+				obj.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end
+		task.wait(1)
+	end
+end)
+
+-- Auto-apply font to new objects as they're created
+Screen.DescendantAdded:Connect(function(obj)
+	if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+		task.wait() -- Wait a frame for the object to fully initialize
+		obj.Font = Setup.Font or Enum.Font.GothamBold
+	end
+end)
 
 return Library
