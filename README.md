@@ -1,12 +1,6 @@
 # Late UI Library
 ### Credits to Late
 
-## Service
-
-```lua
-local UserInputService = game:GetService("UserInputService");
-```
-
 ## Library
 ```lua
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))()
@@ -15,12 +9,12 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-a
 ## Window
 ```lua
 local Window = Library:CreateWindow({
-	Title = "My Library",
-	Theme = "Void",
-	Size = UDim2.fromOffset(570, 370),
-	Transparency = 0.09,
-	Blurring = true,
-	MinimizeKeybind = Enum.KeyCode.LeftAlt,
+    Title = "My Awesome GUI",
+    Size = UDim2.fromOffset(570, 370),
+    Transparency = 0.09,
+    Blurring = true,
+    MinimizeKeybind = Enum.KeyCode.RightControl,
+    Theme = "Dark" -- Can be "Dark", "Light", or "Void"
 })
 ```
 
