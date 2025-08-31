@@ -18,8 +18,8 @@ end
 --// Important 
 local Setup = {
 	Keybind = Enum.KeyCode.LeftControl,
-	Transparency = 0.2,
-	ThemeMode = "Dark",
+	Transparency = 0.09,
+	ThemeMode = "ExtraDark",
 	Size = nil,
 }
 
@@ -204,7 +204,7 @@ end
 --// Setup [UI]
 if (identifyexecutor) then
 	Screen = Services.Insert:LoadLocalAsset("rbxassetid://18490507748");
-	Blur = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/lates-lib/main/Assets/Blur.lua"))();
+	Blur = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Asset/Blur.lua"))();
 else
 	Screen = (script.Parent);
 	Blur = require(script.Blur)
