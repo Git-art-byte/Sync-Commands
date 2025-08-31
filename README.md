@@ -31,6 +31,7 @@ Window:Notify({
 - **Dark**  (Dark background)
 - **Light** (Void background)
 - **Void**  (Light background)
+  
   ```lua
   local Themes = {
 	Light = {
@@ -110,7 +111,7 @@ Window:AddTabSection({
 local Main = Window:AddTab({
 	Title = "Components",
 	Section = "Main",
-	Icon = "rbxassetid://11963373994"
+	Icon = "home"
 })
 ```
 
