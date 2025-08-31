@@ -1,241 +1,82 @@
---// Services
-local UserInputService = game:GetService("UserInputService");
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/YourUsername/YourRepo/main/Source.lua"))()
 
---// Library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/lates-lib/main/Main.lua"))()
 local Window = Library:CreateWindow({
-	Title = "???",
-	Theme = "Dark",
-	
-	Size = UDim2.fromOffset(570, 370),
-	Transparency = 0.2,
-	Blurring = true,
-	MinimizeKeybind = Enum.KeyCode.LeftAlt,
+    Title = "Combat UI",
+    Size = UDim2.fromOffset(600, 400),
+    Transparency = 0.1,
+    Blurring = true,
+    Theme = "Void"
 })
 
-local Themes = {
-	Light = {
-		--// Frames:
-		Primary = Color3.fromRGB(232, 232, 232),
-		Secondary = Color3.fromRGB(255, 255, 255),
-		Component = Color3.fromRGB(245, 245, 245),
-		Interactables = Color3.fromRGB(235, 235, 235),
+-- Add sections
+Window:AddTabSection({Name = "Combat", Order = 1})
+Window:AddTabSection({Name = "Movement", Order = 2})
 
-		--// Text:
-		Tab = Color3.fromRGB(50, 50, 50),
-		Title = Color3.fromRGB(0, 0, 0),
-		Description = Color3.fromRGB(100, 100, 100),
+-- Add tabs
+local CombatTab = Window:AddTab({Title = "Aimbot", Section = "Combat"})
+local MovementTab = Window:AddTab({Title = "Speed", Section = "Movement"})
 
-		--// Outlines:
-		Shadow = Color3.fromRGB(255, 255, 255),
-		Outline = Color3.fromRGB(210, 210, 210),
-
-		--// Image:
-		Icon = Color3.fromRGB(100, 100, 100),
-	},
-	
-	Dark = {
-		--// Frames:
-		Primary = Color3.fromRGB(30, 30, 30),
-		Secondary = Color3.fromRGB(35, 35, 35),
-		Component = Color3.fromRGB(40, 40, 40),
-		Interactables = Color3.fromRGB(45, 45, 45),
-
-		--// Text:
-		Tab = Color3.fromRGB(200, 200, 200),
-		Title = Color3.fromRGB(240,240,240),
-		Description = Color3.fromRGB(200,200,200),
-
-		--// Outlines:
-		Shadow = Color3.fromRGB(0, 0, 0),
-		Outline = Color3.fromRGB(40, 40, 40),
-
-		--// Image:
-		Icon = Color3.fromRGB(220, 220, 220),
-	},
-	
-	Void = {
-		--// Frames:
-		Primary = Color3.fromRGB(15, 15, 15),
-		Secondary = Color3.fromRGB(20, 20, 20),
-		Component = Color3.fromRGB(25, 25, 25),
-		Interactables = Color3.fromRGB(30, 30, 30),
-
-		--// Text:
-		Tab = Color3.fromRGB(200, 200, 200),
-		Title = Color3.fromRGB(240,240,240),
-		Description = Color3.fromRGB(200,200,200),
-
-		--// Outlines:
-		Shadow = Color3.fromRGB(0, 0, 0),
-		Outline = Color3.fromRGB(40, 40, 40),
-
-		--// Image:
-		Icon = Color3.fromRGB(220, 220, 220),
-	},
-
-}
-
---// Set the default theme
-Window:SetTheme(Themes.Dark)
-
---// Sections
-Window:AddTabSection({
-	Name = "Main",
-	Order = 1,
-})
-
-Window:AddTabSection({
-	Name = "Settings",
-	Order = 2,
-})
-
---// Tab [MAIN]
-
-local Main = Window:AddTab({
-	Title = "Components",
-	Section = "Main",
-	Icon = "rbxassetid://11963373994"
-})
-
-Window:AddSection({ Name = "Non Interactable", Tab = Main }) 
-
-
-Window:AddParagraph({
-	Title = "Paragraph",
-	Description = "Insert any important text here.",
-	Tab = Main
-}) 
-
-Window:AddSection({ Name = "Interactable", Tab = Main }) 
-
-Window:AddButton({
-	Title = "Button",
-	Description = "I wonder what this does",
-	Tab = Main,
-	Callback = function() 
-		Window:Notify({
-			Title = "hi",
-			Description = "i'm a notification", 
-			Duration = 5
-		})
-	end,
-}) 
-
-Window:AddSlider({
-	Title = "Slider",
-	Description = "Sliding",
-	Tab = Main,
-	MaxValue = 100,
-	Callback = function(Amount) 
-		warn(Amount);
-	end,
-}) 
+-- Add components to Combat tab
+Window:AddSection({Name = "Aimbot Settings", Tab = CombatTab})
 
 Window:AddToggle({
-	Title = "Toggle",
-	Description = "Switching",
-	Tab = Main,
-	Callback = function(Boolean) 
-		warn(Boolean);
-	end,
-}) 
+    Title = "Enable Aimbot",
+    Description = "Toggle the aimbot system",
+    Default = false,
+    Tab = CombatTab,
+    Callback = function(Value)
+        _G.AimbotEnabled = Value
+    end
+})
 
-Window:AddInput({
-	Title = "Input",
-	Description = "Typing",
-	Tab = Main,
-	Callback = function(Text) 
-		warn(Text);
-	end,
-}) 
-
-
-Window:AddDropdown({
-	Title = "Dropdown",
-	Description = "Selecting",
-	Tab = Main,
-	Options = {
-		["An Option"] = "hi",
-		["And another"] = "hi",
-		["Another"] = "hi",
-	},
-	Callback = function(Number) 
-		warn(Number);
-	end,
-}) 
-
-Window:AddKeybind({
-	Title = "Keybind",
-	Description = "Binding",
-	Tab = Main,
-	Callback = function(Key) 
-		warn("Key Set")
-	end,
-}) 
-
---// Tab [SETTINGS]
-local Keybind = nil
-local Settings = Window:AddTab({
-	Title = "Settings",
-	Section = "Settings",
-	Icon = "rbxassetid://11293977610",
+Window:AddSlider({
+    Title = "Aimbot FOV",
+    Description = "Field of view for target detection",
+    MaxValue = 360,
+    AllowDecimals = false,
+    Tab = CombatTab,
+    Callback = function(Value)
+        _G.AimbotFOV = Value
+    end
 })
 
 Window:AddKeybind({
-	Title = "Minimize Keybind",
-	Description = "Set the keybind for Minimizing",
-	Tab = Settings,
-	Callback = function(Key) 
-		Window:SetSetting("Keybind", Key)
-	end,
-}) 
+    Title = "Aim Key",
+    Description = "Key to hold for aiming",
+    Tab = CombatTab,
+    Callback = function(Key)
+        _G.AimKey = Key
+    end
+})
 
-Window:AddDropdown({
-	Title = "Set Theme",
-	Description = "Set the theme of the library!",
-	Tab = Settings,
-	Options = {
-		["Light Mode"] = "Light",
-		["Dark Mode"] = "Dark",
-		["Extra Dark"] = "Void",
-	},
-	Callback = function(Theme) 
-		Window:SetTheme(Themes[Theme])
-	end,
-}) 
+-- Add components to Movement tab
+Window:AddSection({Name = "Movement Settings", Tab = MovementTab})
 
 Window:AddToggle({
-	Title = "UI Blur",
-	Description = "If enabled, must have your Roblox graphics set to 8+ for it to work",
-	Default = true,
-	Tab = Settings,
-	Callback = function(Boolean) 
-		Window:SetSetting("Blur", Boolean)
-	end,
-}) 
-
+    Title = "Speed Hack",
+    Description = "Increase movement speed",
+    Default = false,
+    Tab = MovementTab,
+    Callback = function(Value)
+        _G.SpeedHack = Value
+    end
+})
 
 Window:AddSlider({
-	Title = "UI Transparency",
-	Description = "Set the transparency of the UI",
-	Tab = Settings,
-	AllowDecimals = true,
-	MaxValue = 1,
-	Callback = function(Amount) 
-		Window:SetSetting("Transparency", Amount)
-	end,
-}) 
+    Title = "Speed Multiplier",
+    Description = "How fast you want to go",
+    MaxValue = 10,
+    AllowDecimals = true,
+    DecimalAmount = 1,
+    Tab = MovementTab,
+    Callback = function(Value)
+        _G.SpeedMultiplier = Value
+    end
+})
 
+-- Show welcome notification
 Window:Notify({
-	Title = "Hello World!",
-	Description = "Press Left Alt to Minimize and Open the tab!", 
-	Duration = 10
+    Title = "UI Loaded",
+    Description = "Combat UI has been successfully loaded!",
+    Duration = 3
 })
-
---// Keybind Example
-UserInputService.InputBegan:Connect(function(Key) 
-	if Key == Keybind then
-		warn("You have pressed the minimize keybind!");
-	end
-end)
