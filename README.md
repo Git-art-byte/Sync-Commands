@@ -27,6 +27,11 @@ local Window = Library:CreateWindow({
 local Themes = { Light = {...}, Dark = {...}, Void = {...} Window:SetTheme(Themes.Dark)
 ```
 
+## Sections
+```lua
+Window:AddTabSection({ Name = "Main", Order = 1 })
+```
+
 ## Tabs
 ```lua
 local Main = Window:AddTab({
