@@ -1,5 +1,3 @@
-# Source Code
-
 --[[
 	User Interface Library
 	Made by Late
