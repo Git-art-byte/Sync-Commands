@@ -23,9 +23,9 @@ local Window = Library:CreateWindow({
 })
 ```
 ### Themes
-- **Dark**  #1E1E1E (primary background)
-- **Light** #E8E8E8 (primary background)
-- **Void**  #0F0F0F (primary background)
+- **Dark**  (Primary background)
+- **Light** (Void background)
+- **Void**  (Light background)
 
 ## Sections
 ```lua
