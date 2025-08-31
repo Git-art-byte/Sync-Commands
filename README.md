@@ -16,7 +16,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-a
 ```lua
 local Window = Library:CreateWindow({
 	Title = "My Library",
-	Theme = "Dark",
+	Theme = "Void",
 	Size = UDim2.fromOffset(570, 370),
 	Transparency = 0.09,
 	Blurring = true,
