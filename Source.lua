@@ -20,7 +20,7 @@ end
 local Setup = {
 	Keybind = Enum.KeyCode.LeftControl,
 	Transparency = 0.09,
-	ThemeMode = "Void",
+	ThemeMode = "Dark",
 	Size = nil,
 	Font = Enum.Font.GothamBold,
 }
@@ -946,9 +946,66 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		},
 	}
 
-	function Options:SetTheme(Info)
-		Theme = Info or Theme
+	function Options:SetTheme(themeInfo)
+		-- Handle both string theme names and color tables
+		if type(themeInfo) == "string" then
+			-- String input - check if it's a built-in theme
+			if themeInfo == "Dark" then
+				Theme = {
+					Primary = Color3.fromRGB(30, 30, 30),
+					Secondary = Color3.fromRGB(35, 35, 35),
+					Component = Color3.fromRGB(40, 40, 40),
+					Interactables = Color3.fromRGB(45, 45, 45),
+					Tab = Color3.fromRGB(200, 200, 200),
+					Title = Color3.fromRGB(240,240,240),
+					Description = Color3.fromRGB(200,200,200),
+					Shadow = Color3.fromRGB(0, 0, 0),
+					Outline = Color3.fromRGB(40, 40, 40),
+					Icon = Color3.fromRGB(220, 220, 220),
+				}
+				Setup.ThemeMode = "Dark"
+			elseif themeInfo == "Light" then
+				Theme = {
+					Primary = Color3.fromRGB(232, 232, 232),
+					Secondary = Color3.fromRGB(255, 255, 255),
+					Component = Color3.fromRGB(245, 245, 245),
+					Interactables = Color3.fromRGB(235, 235, 235),
+					Tab = Color3.fromRGB(50, 50, 50),
+					Title = Color3.fromRGB(0, 0, 0),
+					Description = Color3.fromRGB(100, 100, 100),
+					Shadow = Color3.fromRGB(255, 255, 255),
+					Outline = Color3.fromRGB(210, 210, 210),
+					Icon = Color3.fromRGB(100, 100, 100),
+				}
+				Setup.ThemeMode = "Light"
+			elseif themeInfo == "Void" then
+				Theme = {
+					Primary = Color3.fromRGB(15, 15, 15),
+					Secondary = Color3.fromRGB(20, 20, 20),
+					Component = Color3.fromRGB(25, 25, 25),
+					Interactables = Color3.fromRGB(30, 30, 30),
+					Tab = Color3.fromRGB(200, 200, 200),
+					Title = Color3.fromRGB(240,240,240),
+					Description = Color3.fromRGB(200,200,200),
+					Shadow = Color3.fromRGB(0, 0, 0),
+					Outline = Color3.fromRGB(40, 40, 40),
+					Icon = Color3.fromRGB(220, 220, 220),
+				}
+				Setup.ThemeMode = "Void"
+			else
+				warn("Theme '" .. themeInfo .. "' not found! Using default Dark theme.")
+				Setup.ThemeMode = "Dark"
+			end
+		elseif type(themeInfo) == "table" then
+			-- Table input - use custom theme
+			Theme = themeInfo
+			Setup.ThemeMode = "Custom"
+		else
+			warn("Invalid theme input type. Using default Dark theme.")
+			Setup.ThemeMode = "Dark"
+		end
 
+		-- Apply the theme to all UI elements
 		Window.BackgroundColor3 = Theme.Primary
 		Holder.BackgroundColor3 = Theme.Secondary
 		Window.UIStroke.Color = Theme.Shadow
@@ -1022,8 +1079,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 				BlurEnabled = false
 			end
 			
-		elseif Setting == "Theme" and typeof(Value) == "table" then
-			
+		elseif Setting == "Theme" then
+			-- This now accepts both string names and color tables
 			Options:SetTheme(Value)
 			
 		elseif Setting == "Font" then
@@ -1038,6 +1095,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			warn("Tried to change a setting that doesn't exist or isn't available to change.")
 		end
 	end
+
+	-- Apply the initial theme
+	Options:SetTheme(Settings.Theme or "Dark")
 
 	SetProperty(Window, { Size = Settings.Size, Visible = true, Parent = Screen });
 	Animations:Open(Window, Settings.Transparency or 0)
