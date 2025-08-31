@@ -70,7 +70,7 @@ Window:AddKeybind({
     Title = "Keybind",
     Description = "Press a key to bind",
     Tab = Main,
-    Default = Enum.KeyCode.LeftShift,
+    Default = Enum.KeyCode.LeftAlt,
     Callback = function(Key)
         Window:SetSetting("Keybind", Key)
         print("Keybind set to:", Key)
