@@ -6,67 +6,72 @@ local Library = loadstring(
     )
 )()
 
---// Create Main Window
 local Window = Library:CreateWindow({
-    Name = 'My Command UI',
-    IntroText = 'Custom Commands Loaded',
+    Name = 'Sync Commands',
+    IntroText = 'Sync Commands Loaded!',
     IntroIcon = 'rbxassetid://10618644218',
     IntroBlur = true,
     IntroBlurIntensity = 15,
-    Theme = Library.Themes.dark, -- dark | light
-    Position = 'bottom',         -- top | bottom
+    Theme = Library.Themes.dark,
+    Position = 'top',
     Draggable = true,
-    Prefix = ';'                 -- prefix for commands
+    Prefix = ';'
 })
 
---// ==============================
---// COMMANDS SECTION
---// ==============================
+-- Helper to get character safely
+local function getCharacter()
+    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local root = char:WaitForChild("HumanoidRootPart")
+    return char, hum, root
+end
 
--- WalkSpeed Command
-Window:AddCommand('speed', {'Number'}, 'Set your WalkSpeed.', function(Arguments)
-    local value = tonumber(Arguments[1])
+-- WalkSpeed
+Window:AddCommand('speed', {'Number'}, 'Set your WalkSpeed.', function(args)
+    local _, hum = getCharacter()
+    local value = tonumber(args[1])
     if value then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+        hum.WalkSpeed = value
         Window:CreateNotification('WalkSpeed Changed', 'WalkSpeed set to ' .. value, 5)
     else
-        Window:CreateNotification('Error', 'Invalid number entered!', 5)
+        Window:CreateNotification('Error', 'Invalid number!', 5)
     end
-end, {'WalkSpeed', 'ws'})
+end, {'ws', 'WalkSpeed'})
 
--- JumpPower Command
-Window:AddCommand('jump', {'Number'}, 'Set your JumpPower.', function(Arguments)
-    local value = tonumber(Arguments[1])
+-- JumpPower
+Window:AddCommand('jump', {'Number'}, 'Set your JumpPower.', function(args)
+    local _, hum = getCharacter()
+    local value = tonumber(args[1])
     if value then
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+        hum.JumpPower = value
         Window:CreateNotification('JumpPower Changed', 'JumpPower set to ' .. value, 5)
     else
-        Window:CreateNotification('Error', 'Invalid number entered!', 5)
+        Window:CreateNotification('Error', 'Invalid number!', 5)
     end
-end, {'JumpPower', 'jp'})
+end, {'jp', 'JumpPower'})
 
--- Reset Command (respawns the local player)
+-- Reset
 Window:AddCommand('reset', {}, 'Reset your character.', function()
-    local player = game.Players.LocalPlayer
-    if player and player.Character then
-        player.Character:BreakJoints()
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        char:BreakJoints()
         Window:CreateNotification('Character Reset', 'You have been reset.', 5)
     end
 end, {'respawn'})
 
--- RemoteSpy Command
-Window:AddCommand('remotespy', {}, 'Load RemoteSpy to monitor RemoteEvents.', function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/remote-spy/main/source.lua"))()
-    Window:CreateNotification('RemoteSpy Loaded', 'RemoteSpy script has been executed.', 5)
+-- RemoteSpy
+Window:AddCommand('remotespy', {}, 'Load RemoteSpy.', function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/SimpleSpy/refs/heads/main/Mobile.lua"))()
+    Window:CreateNotification('RemoteSpy Loaded', 'RemoteSpy executed.', 5)
 end, {'rspy'})
 
--- Noclip / Unnoclip Commands
+-- Noclip
 local noclip = false
 local noclipConn
-Window:AddCommand('noclip', {}, 'Enable noclip (walk through walls).', function()
+Window:AddCommand('noclip', {}, 'Enable noclip.', function()
     if noclip then return end
     noclip = true
-    local char = game.Players.LocalPlayer.Character
+    local char = getCharacter()
     noclipConn = game:GetService("RunService").Stepped:Connect(function()
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
@@ -74,7 +79,7 @@ Window:AddCommand('noclip', {}, 'Enable noclip (walk through walls).', function(
             end
         end
     end)
-    Window:CreateNotification('Noclip Enabled', 'You can now walk through walls.', 5)
+    Window:CreateNotification('Noclip Enabled', 'You can walk through walls.', 5)
 end)
 
 Window:AddCommand('unnoclip', {}, 'Disable noclip.', function()
@@ -85,19 +90,45 @@ Window:AddCommand('unnoclip', {}, 'Disable noclip.', function()
     end
 end)
 
---// ==============================
---// HOW TO ADD NEW COMMANDS
---// ==============================
--- 1. Copy this block:
---[[
-Window:AddCommand('mainName', {'Arguments'}, 'Description here.', function(Arguments)
-    -- Your code here
-end, {'alias1', 'alias2'})
-]]
--- 2. Replace:
---   'mainName' → the main trigger word (ex: "fly")
---   {'Arguments'} → argument type (Number, String, Player, etc.)
---   'Description here.' → what the command does
---   function(...) → code that runs
---   {'alias1', 'alias2'} → extra names (optional)
--- 3. Done! Now type ;mainName in chat.
+-- Fly / Unfly
+local flying = false
+local flyConn
+Window:AddCommand('fly', {}, 'Enable fly.', function()
+    if flying then return end
+    flying = true
+    local char, hum, root = getCharacter()
+    hum.PlatformStand = true
+    flyConn = game:GetService("RunService").Heartbeat:Connect(function()
+        if not flying then return end
+        local move = hum.MoveDirection
+        root.Velocity = (move * 50) + Vector3.new(0, hum.Jump and 50 or 0, 0)
+    end)
+    Window:CreateNotification('Fly Enabled', 'Fly mode active.', 5)
+end)
+
+Window:AddCommand('unfly', {}, 'Disable fly.', function()
+    if flying and flyConn then
+        flyConn:Disconnect()
+        flying = false
+        local _, hum = getCharacter()
+        hum.PlatformStand = false
+        Window:CreateNotification('Fly Disabled', 'Fly mode off.', 5)
+    end
+end)
+
+
+-- Dynamic Help Command
+Window:AddCommand('help', {}, 'Show all available commands.', function()
+    local lines = {}
+    for _, cmd in ipairs(Window.Commands) do
+        local aliases = cmd.Aliases or {}
+        local nameList = {cmd.Name}
+        for _, a in ipairs(aliases) do
+            table.insert(nameList, a)
+        end
+        table.insert(lines, table.concat(nameList, " / "))
+    end
+
+    local text = "Available Commands:\n" .. table.concat(lines, "\n")
+    Window:CreateNotification('Command List', text, 10)
+end)
