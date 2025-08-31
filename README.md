@@ -18,7 +18,7 @@ local Window = Library:CreateWindow({
 	Title = "My Library",
 	Theme = "Dark",
 	Size = UDim2.fromOffset(570, 370),
-	Transparency = 0.2,
+	Transparency = 0.09,
 	Blurring = true,
 	MinimizeKeybind = Enum.KeyCode.LeftAlt,
 })
