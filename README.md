@@ -99,6 +99,10 @@ Window:Notify({
 		Icon = Color3.fromRGB(220, 220, 220),
 	},
 
+### Default Theme
+```lua
+Window:SetTheme(Themes.Dark)
+```
 ## Sections
 ```lua
 Window:AddTabSection({
