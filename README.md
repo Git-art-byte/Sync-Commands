@@ -26,3 +26,12 @@ local Window = Library:CreateWindow({
 ```lua
 local Themes = { Light = {...}, Dark = {...}, Void = {...} Window:SetTheme(Themes.Dark)
 ```
+
+## Tabs
+```lua
+local Main = Window:AddTab({
+	Title = "Components",
+	Section = "Main",
+	Icon = "rbxassetid://11963373994"
+})
+```
