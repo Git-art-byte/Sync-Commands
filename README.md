@@ -121,7 +121,7 @@ local Keybind = nil
 local Settings = Window:AddTab({
 	Title = "Settings",
 	Section = "Settings",
-	Icon = "rbxassetid://11293977610",
+	Icon = "settings",
 })
 
 Window:AddKeybind({
