@@ -22,7 +22,7 @@ local Window = Library:CreateWindow({
 	MinimizeKeybind = Enum.KeyCode.LeftAlt,
 })
 ```
-### Themes
+## Themes
 - **Dark**  (Primary background)
 - **Light** (Void background)
 - **Void**  (Light background)
