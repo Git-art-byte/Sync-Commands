@@ -60,6 +60,27 @@ local Player = {
 	GUI = LocalPlayer.PlayerGui;
 }
 
+-- Function to get Lucide icon URL by name (no manual mapping needed!)
+local function GetLucideIcon(iconName)
+    -- Lucide icons CDN URL
+    local baseUrl = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/"
+    
+    -- Convert icon name to kebab-case (lucide naming convention)
+    local kebabName = iconName:gsub("%u", "-%1"):lower()
+    
+    -- Remove leading dash if present
+    if kebabName:sub(1, 1) == "-" then
+        kebabName = kebabName:sub(2)
+    end
+    
+    -- Fallback to alert icon if something goes wrong
+    if not kebabName or kebabName == "" then
+        kebabName = "alert-circle"
+    end
+    
+    return baseUrl .. kebabName .. ".svg"
+end
+
 local Tween = function(Object : Instance, Speed : number, Properties : {},  Info : { EasingStyle: Enum?, EasingDirection: Enum? })
 	local Style, Direction
 
