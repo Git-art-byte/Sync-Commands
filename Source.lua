@@ -1,11 +1,9 @@
 --// Load Visual Command UI Library
 local Library = loadstring(
-    game:HttpGet(
-        'https://raw.githubusercontent.com/VisualRoblox/Roblox/main/UI-Libraries/Visual%20Command%20UI%20Library/Source.lua',
-        true
-    )
+    game:HttpGet('https://raw.githubusercontent.com/VisualRoblox/Roblox/main/UI-Libraries/Visual%20Command%20UI%20Library/Source.lua', true)
 )()
 
+--// Create Main Window
 local Window = Library:CreateWindow({
     Name = 'Sync Commands',
     IntroText = 'Sync Commands Loaded!',
@@ -18,7 +16,37 @@ local Window = Library:CreateWindow({
     Prefix = ';'
 })
 
--- Helper to get character safely
+--// Make GUI draggable on mobile & PC
+local UIS = game:GetService("UserInputService")
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
+        end
+    end)
+end
+makeDraggable(Window.MainFrame)
+
+--// Helper to get character safely
 local function getCharacter()
     local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
     local hum = char:WaitForChild("Humanoid")
@@ -26,7 +54,7 @@ local function getCharacter()
     return char, hum, root
 end
 
--- WalkSpeed
+--// WalkSpeed
 Window:AddCommand('speed', {'Number'}, 'Set your WalkSpeed.', function(args)
     local _, hum = getCharacter()
     local value = tonumber(args[1])
@@ -38,7 +66,7 @@ Window:AddCommand('speed', {'Number'}, 'Set your WalkSpeed.', function(args)
     end
 end, {'ws', 'WalkSpeed'})
 
--- JumpPower
+--// JumpPower
 Window:AddCommand('jump', {'Number'}, 'Set your JumpPower.', function(args)
     local _, hum = getCharacter()
     local value = tonumber(args[1])
@@ -50,7 +78,7 @@ Window:AddCommand('jump', {'Number'}, 'Set your JumpPower.', function(args)
     end
 end, {'jp', 'JumpPower'})
 
--- Reset
+--// Reset Character
 Window:AddCommand('reset', {}, 'Reset your character.', function()
     local char = game.Players.LocalPlayer.Character
     if char then
@@ -59,19 +87,19 @@ Window:AddCommand('reset', {}, 'Reset your character.', function()
     end
 end, {'respawn'})
 
--- RemoteSpy
+--// RemoteSpy
 Window:AddCommand('remotespy', {}, 'Load RemoteSpy.', function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/SimpleSpy/refs/heads/main/Mobile.lua"))()
     Window:CreateNotification('RemoteSpy Loaded', 'RemoteSpy executed.', 5)
 end, {'rspy'})
 
--- Noclip
+--// Noclip / Unnoclip
 local noclip = false
 local noclipConn
 Window:AddCommand('noclip', {}, 'Enable noclip.', function()
     if noclip then return end
     noclip = true
-    local char = getCharacter()
+    local char, _, _ = getCharacter()
     noclipConn = game:GetService("RunService").Stepped:Connect(function()
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
@@ -90,13 +118,13 @@ Window:AddCommand('unnoclip', {}, 'Disable noclip.', function()
     end
 end)
 
--- Fly / Unfly
+--// Fly / Unfly
 local flying = false
 local flyConn
 Window:AddCommand('fly', {}, 'Enable fly.', function()
     if flying then return end
     flying = true
-    local char, hum, root = getCharacter()
+    local _, hum, root = getCharacter()
     hum.PlatformStand = true
     flyConn = game:GetService("RunService").Heartbeat:Connect(function()
         if not flying then return end
@@ -116,8 +144,7 @@ Window:AddCommand('unfly', {}, 'Disable fly.', function()
     end
 end)
 
-
--- Dynamic Help Command
+--// Dynamic Help Command
 Window:AddCommand('help', {}, 'Show all available commands.', function()
     local lines = {}
     for _, cmd in ipairs(Window.Commands) do
@@ -128,7 +155,6 @@ Window:AddCommand('help', {}, 'Show all available commands.', function()
         end
         table.insert(lines, table.concat(nameList, " / "))
     end
-
     local text = "Available Commands:\n" .. table.concat(lines, "\n")
     Window:CreateNotification('Command List', text, 10)
 end)
