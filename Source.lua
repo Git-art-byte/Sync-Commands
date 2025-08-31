@@ -2,6 +2,7 @@
 	User Interface Library
 	Made by Late
 	Updated with Gotham Bold Font
+	Updated with Lucid Icons Support
 ]]
 
 --// Connections
