@@ -101,7 +101,7 @@ Window:Notify({
 
 ### Default Theme
 ```lua
-Window:SetTheme(Themes.Dark)
+Window:SetTheme(Themes.Void)
 ```
 ## Sections
 ```lua
