@@ -131,16 +131,11 @@ Window:AddParagraph({
 
 ## Keybinds
 ```lua
-Window:AddKeybind({
-    Title = "Keybind",
-    Description = "Press a key to bind",
-    Tab = Main,
-    Default = Enum.KeyCode.LeftAlt,
-    Callback = function(Key)
-        Window:SetSetting("Keybind", Key)
-        print("Keybind set to:", Key)
-    end
-})
+UserInputService.InputBegan:Connect(function(Key) 
+	if Key == Keybind then
+		warn("You have pressed the minimize keybind!");
+	end
+end)
 ```
 
 ## Dropdowns
