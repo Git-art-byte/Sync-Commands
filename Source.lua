@@ -23,38 +23,24 @@ local Setup = {
 	Size = nil,
 }
 
-local Themes = {
-    Dark = {
-        Primary = Color3.fromRGB(30, 30, 30),
-        Secondary = Color3.fromRGB(35, 35, 35),
-        Component = Color3.fromRGB(40, 40, 40),
-        Interactables = Color3.fromRGB(45, 45, 45),
+local Theme = { --// (Dark Theme)
+	--// Frames:
+	Primary = Color3.fromRGB(30, 30, 30),
+	Secondary = Color3.fromRGB(35, 35, 35),
+	Component = Color3.fromRGB(40, 40, 40),
+	Interactables = Color3.fromRGB(45, 45, 45),
 
-        Tab = Color3.fromRGB(200, 200, 200),
-        Title = Color3.fromRGB(240, 240, 240),
-        Description = Color3.fromRGB(200, 200, 200),
+	--// Text:
+	Tab = Color3.fromRGB(200, 200, 200),
+	Title = Color3.fromRGB(240,240,240),
+	Description = Color3.fromRGB(200,200,200),
 
-        Shadow = Color3.fromRGB(0, 0, 0),
-        Outline = Color3.fromRGB(40, 40, 40),
+	--// Outlines:
+	Shadow = Color3.fromRGB(0, 0, 0),
+	Outline = Color3.fromRGB(40, 40, 40),
 
-        Icon = Color3.fromRGB(220, 220, 220)
-    },
-
-    Light = {
-        Primary = Color3.fromRGB(232, 232, 232),
-        Secondary = Color3.fromRGB(255, 255, 255),
-        Component = Color3.fromRGB(245, 245, 245),
-        Interactables = Color3.fromRGB(235, 235, 235),
-
-        Tab = Color3.fromRGB(50, 50, 50),
-        Title = Color3.fromRGB(0, 0, 0),
-        Description = Color3.fromRGB(100, 100, 100),
-
-        Shadow = Color3.fromRGB(255, 255, 255),
-        Outline = Color3.fromRGB(210, 210, 210),
-
-        Icon = Color3.fromRGB(100, 100, 100)
-    }
+	--// Image:
+	Icon = Color3.fromRGB(220, 220, 220),
 }
 
 --// Services & Functions
