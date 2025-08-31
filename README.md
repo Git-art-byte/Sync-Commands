@@ -46,5 +46,9 @@ local Main = Window:AddTab({
 
 ## Paragraphs
 ```lua
-Window:AddParagraph({Title="Paragraph", Description="Text.", Tab = Main})
+Window:AddParagraph({
+    Title = "Paragraph",
+    Description = "Insert any important text here.",
+    Tab = Main
+})
 ```
