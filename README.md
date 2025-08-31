@@ -23,9 +23,7 @@ local Window = Library:CreateWindow({
 })
 ```
 ### Themes
-```lua
-local Themes = { Light = {...}, Dark = {...}, Void = {...} Window:SetTheme(Themes.Dark)
-```
+Dark,Light,Void
 
 ## Sections
 ```lua
