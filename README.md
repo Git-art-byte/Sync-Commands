@@ -29,7 +29,10 @@ local Themes = { Light = {...}, Dark = {...}, Void = {...} Window:SetTheme(Theme
 
 ## Sections
 ```lua
-Window:AddTabSection({ Name = "Main", Order = 1 })
+Window:AddTabSection({
+    Name = "Main",
+    Order = 1
+})
 ```
 
 ## Tabs
@@ -39,4 +42,9 @@ local Main = Window:AddTab({
 	Section = "Main",
 	Icon = "rbxassetid://11963373994"
 })
+```
+
+## Paragraphs
+```lua
+Window:AddParagraph({Title="Paragraph", Description="Text.", Tab = Main})
 ```
