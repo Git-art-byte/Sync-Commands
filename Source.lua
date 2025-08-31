@@ -20,7 +20,7 @@ end
 local Setup = {
 	Keybind = Enum.KeyCode.LeftControl,
 	Transparency = 0.09,
-	ThemeMode = "ExtraDark",
+	ThemeMode = "Void",
 	Size = nil,
 	Font = Enum.Font.GothamBold,
 }
