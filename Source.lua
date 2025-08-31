@@ -469,42 +469,69 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	end
 
 	function Options:AddTab(Settings: { Title: string, Icon: string, Section: string? })
-		if StoredInfo["Tabs"][Settings.Title] then 
-			error("[UI LIB]: A tab with the same name has already been created") 
-		end 
+    if StoredInfo["Tabs"][Settings.Title] then 
+        error("[UI LIB]: A tab with the same name has already been created") 
+    end 
 
-		local Example, MainExample = Examples["TabButtonExample"], Examples["MainExample"];
-		local Section = StoredInfo["Sections"][Settings.Section];
-		local Main = Clone(MainExample);
-		local Tab = Clone(Example);
+    local Example, MainExample = Examples["TabButtonExample"], Examples["MainExample"];
+    local Section = StoredInfo["Sections"][Settings.Section];
+    local Main = Clone(MainExample);
+    local Tab = Clone(Example);
 
-		if not Settings.Icon then
-			Destroy(Tab["ICO"]);
-		else
-			SetProperty(Tab["ICO"], { Image = Settings.Icon });
-		end
+    if not Settings.Icon then
+        Destroy(Tab["ICO"]);
+    else
+        -- Check if it's a Lucide icon name or a direct URL
+        if not Settings.Icon:find("rbxassetid://") and not Settings.Icon:find("http") then
+            -- It's a Lucide icon name, get the URL automatically
+            local function GetLucideIcon(iconName)
+                local baseUrl = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/"
+                
+                -- Convert icon name to kebab-case (lucide naming convention)
+                local kebabName = iconName:gsub("%u", "-%1"):lower()
+                
+                -- Remove leading dash if present
+                if kebabName:sub(1, 1) == "-" then
+                    kebabName = kebabName:sub(2)
+                end
+                
+                -- Fallback to alert icon if something goes wrong
+                if not kebabName or kebabName == "" then
+                    kebabName = "alert-circle"
+                end
+                
+                return baseUrl .. kebabName .. ".svg"
+            end
+            
+            local iconUrl = GetLucideIcon(Settings.Icon)
+            SetProperty(Tab["ICO"], { Image = iconUrl });
+        else
+            -- It's already a direct URL or asset ID
+            SetProperty(Tab["ICO"], { Image = Settings.Icon });
+        end
+    end
 
-		StoredInfo["Tabs"][Settings.Title] = { Tab }
-		SetProperty(Tab["TextLabel"], { Text = Settings.Title });
+    StoredInfo["Tabs"][Settings.Title] = { Tab }
+    SetProperty(Tab["TextLabel"], { Text = Settings.Title });
 
-		SetProperty(Main, { 
-			Parent = MainExample.Parent,
-			Name = Settings.Title;
-		});
+    SetProperty(Main, { 
+        Parent = MainExample.Parent,
+        Name = Settings.Title;
+    });
 
-		SetProperty(Tab, { 
-			Parent = Example.Parent,
-			LayoutOrder = Section or #StoredInfo["Sections"] + 1,
-			Name = Settings.Title;
-			Visible = true;
-		});
+    SetProperty(Tab, { 
+        Parent = Example.Parent,
+        LayoutOrder = Section or #StoredInfo["Sections"] + 1,
+        Name = Settings.Title;
+        Visible = true;
+    });
 
-		Tab.MouseButton1Click:Connect(function()
-			Options:SetTab(Tab.Name);
-		end)
+    Tab.MouseButton1Click:Connect(function()
+        Options:SetTab(Tab.Name);
+    end)
 
-		return Main.ScrollingFrame
-	end
+    return Main.ScrollingFrame
+end
 	
 	--// Notifications
 	
