@@ -946,9 +946,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 		Classes = {
 			["ImageLabel"] = function(Label)
-				if Label.Image ~= "rbxassetid://6644618143" then
 					Label.ImageColor3 = Theme.Icon
-				end
 			end,
 
 			["TextLabel"] = function(Label)
