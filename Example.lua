@@ -16,6 +16,8 @@ local Window = Library:CreateWindow({
     Theme = "Void" -- Options: "Dark", "Light", "Void", or custom table
 })
 
+Window:DropdownColor("Void")
+
 -- Add tab sections (optional - for organizing tabs)
 Window:AddTabSection({
     Name = "Main Features",
