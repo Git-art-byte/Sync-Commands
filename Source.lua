@@ -61,12 +61,11 @@ local Player = {
 	GUI = LocalPlayer.PlayerGui;
 }
 
--- Function to get Lucide icon URL by name (no manual mapping needed!)
+-- Function to get Lucide icon URL by name
 local function GetLucideIcon(iconName)
-    -- Lucide icons CDN URL
     local baseUrl = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/"
     
-    -- Convert icon name to kebab-case (lucide naming convention)
+    -- Convert icon name to kebab-case
     local kebabName = iconName:gsub("%u", "-%1"):lower()
     
     -- Remove leading dash if present
@@ -484,25 +483,6 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
         -- Check if it's a Lucide icon name or a direct URL
         if not Settings.Icon:find("rbxassetid://") and not Settings.Icon:find("http") then
             -- It's a Lucide icon name, get the URL automatically
-            local function GetLucideIcon(iconName)
-                local baseUrl = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/"
-                
-                -- Convert icon name to kebab-case (lucide naming convention)
-                local kebabName = iconName:gsub("%u", "-%1"):lower()
-                
-                -- Remove leading dash if present
-                if kebabName:sub(1, 1) == "-" then
-                    kebabName = kebabName:sub(2)
-                end
-                
-                -- Fallback to alert icon if something goes wrong
-                if not kebabName or kebabName == "" then
-                    kebabName = "alert-circle"
-                end
-                
-                return baseUrl .. kebabName .. ".svg"
-            end
-            
             local iconUrl = GetLucideIcon(Settings.Icon)
             SetProperty(Tab["ICO"], { Image = iconUrl });
         else
@@ -531,7 +511,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
     end)
 
     return Main.ScrollingFrame
-end
+	end
 	
 	--// Notifications
 	
