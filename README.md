@@ -11,10 +11,10 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-a
 local Window = Library:CreateWindow({
     Title = "My Awesome GUI",
     Size = UDim2.fromOffset(570, 370),
-    Transparency = 0.09,
+    Transparency = 0.15,
     Blurring = true,
     MinimizeKeybind = Enum.KeyCode.RightControl,
-    Theme = "Dark" -- Can be "Dark", "Light", or "Void"
+    Theme = "Void" -- Can be "Dark", "Light", or "Void"
 })
 ```
 
