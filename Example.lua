@@ -55,7 +55,7 @@ local SettingsTab = Window:AddTab({
 })
 
 local InfoTab = Window:AddTab({
-    Title = "Info" -- No icon
+    Title = "Info", -- No icon
     Icon = 11780939142 -- Info icon ID
 })
 
