@@ -998,6 +998,25 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 				end
 			end,
 
+			-- Window control buttons (always keep original colors)
+			["Close"] = function(Button)
+				if Button:IsA("TextButton") then
+					Button.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Always red
+				end
+			end,
+			
+			["Minimize"] = function(Button)
+				if Button:IsA("TextButton") then
+					Button.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Always yellow
+				end
+			end,
+			
+			["Maximize"] = function(Button)
+				if Button:IsA("TextButton") then
+					Button.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Always green
+				end
+			end,
+
 			["Main"] = function(Label)
 				if Label:IsA("Frame") then
 
@@ -1074,6 +1093,11 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			end,
 
 			["TextButton"] = function(Label)
+				-- Skip window control buttons to preserve their colors
+				if Label.Name == "Close" or Label.Name == "Minimize" or Label.Name == "Maximize" then
+					return -- Don't change window control buttons
+				end
+				
 				if Label:FindFirstChild("Labels") then
 					Label.BackgroundColor3 = Theme.Component
 				elseif Label.Parent and Label.Parent.Name == "ScrollingFrame" and Label.Parent.Parent and Label.Parent.Parent.Name == "DropdownExample" then
@@ -1142,6 +1166,18 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			elseif Class then
 				Class(Descendant);
 			end
+		end
+		
+		-- Force window control buttons to maintain their colors
+		local windowButtons = Sidebar.Top.Buttons
+		if windowButtons:FindFirstChild("Close") then
+			windowButtons.Close.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Red
+		end
+		if windowButtons:FindFirstChild("Minimize") then
+			windowButtons.Minimize.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Yellow
+		end
+		if windowButtons:FindFirstChild("Maximize") then
+			windowButtons.Maximize.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Green
 		end
 	end
 
