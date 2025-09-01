@@ -1,5 +1,5 @@
 --[[
-	User Interface Library
+	User Interface Library for Exploits
 	Made by Late
 	Updated with Gotham Bold Font
 	Updated with Lucid Icons Support
@@ -61,17 +61,15 @@ local Player = {
 	GUI = LocalPlayer.PlayerGui;
 }
 
--- Function to get Lucide icon URL by name
+-- Function to get Lucide icon URL by name (FIXED)
 local function GetLucideIcon(iconName)
     local baseUrl = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/"
     
-    -- Convert icon name to kebab-case
-    local kebabName = iconName:gsub("%u", "-%1"):lower()
+    -- Convert icon name to kebab-case (proper implementation)
+    local kebabName = iconName:gsub("(%l)(%u)", "%1-%2"):gsub("(%u)(%u%l)", "%1-%2"):lower()
     
-    -- Remove leading dash if present
-    if kebabName:sub(1, 1) == "-" then
-        kebabName = kebabName:sub(2)
-    end
+    -- Remove any leading or trailing dashes
+    kebabName = kebabName:gsub("^%-+", ""):gsub("%-+$", "")
     
     -- Fallback to alert icon if something goes wrong
     if not kebabName or kebabName == "" then
@@ -229,20 +227,32 @@ local Resizeable = function(Tab, Minimum, Maximum)
 	end)
 end
 
---// Setup [UI]
+--// Setup [UI] - Exploit version
 local Screen
-if (identifyexecutor) then
-	Screen = Services.Insert:LoadLocalAsset("rbxassetid://18490507748");
-	Blur = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Asset/Blur.lua"))();
+if identifyexecutor then
+    -- For exploits, use InsertService to load the UI
+    Screen = Services.Insert:LoadLocalAsset("rbxassetid://18490507748") -- Replace with your UI asset ID
+    
+    -- Simple blur effect for exploits
+    Blur = {
+        new = function(window, intensity)
+            local blur = Instance.new("BlurEffect")
+            blur.Size = intensity
+            blur.Parent = game:GetService("Lighting")
+            return {root = blur}
+        end
+    }
 else
-	Screen = (script.Parent);
-	Blur = require(script.Blur)
+    -- For studio/real game
+    Screen = (script.Parent);
+    Blur = require(script.Blur)
 end
 
 Screen.Main.Visible = false
 
+-- Parent to CoreGui for exploits
 xpcall(function()
-	Screen.Parent = game.CoreGui
+	Screen.Parent = game:GetService("CoreGui")
 end, function() 
 	Screen.Parent = Player.GUI
 end)
@@ -447,7 +457,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 					task.delay(.2, function()
 						Main.Visible = false
-					end)
+					end
 				end
 			end
 		end
