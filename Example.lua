@@ -1,67 +1,74 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))()
+-- Example script using your UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))() -- Replace with your actual URL
 
+-- Create the main window
 local Window = Library:CreateWindow({
-    Title = "Player Utilities",
-    Size = UDim2.fromOffset(600, 400),
+    Title = "Demo UI",
+    Size = UDim2.new(0, 500, 0, 400),
     Transparency = 0.15,
     Blurring = true,
-    Theme = "Void"
+    Theme = "Void",
+    MinimizeKeybind = Enum.KeyCode.RightControl
 })
 
--- Create sections
-Window:AddTabSection({
-    Name = "Player", 
-    Order = 1
+-- Add tab sections
+Window:AddTabSection({Name = "Main", Order = 1})
+Window:AddTabSection({Name = "Combat", Order = 2})
+Window:AddTabSection({Name = "Visuals", Order = 3})
+Window:AddTabSection({Name = "Misc", Order = 4})
+
+-- Main Tab with user icon
+local MainTab = Window:AddTab({
+    Title = "Player",
+    Icon = "user",  -- Lucide icon name
+    Section = "Main"
 })
 
-Window:AddTabSection({
-    Name = "Visual", 
-    Order = 2
+-- Combat Tab with sword icon
+local CombatTab = Window:AddTab({
+    Title = "Combat",
+    Icon = "sword",  -- Lucide icon name
+    Section = "Combat"
 })
 
-Window:AddTabSection({
-    Name = "Fun", 
-    Order = 3
+-- Visuals Tab with eye icon
+local VisualsTab = Window:AddTab({
+    Title = "Visuals",
+    Icon = "eye",  -- Lucide icon name
+    Section = "Visuals"
 })
 
--- Create tabs with DIRECT Lucide icon URLs (to ensure they work)
-local PlayerTab = Window:AddTab({
-    Title = "Player", 
-    Section = "Player",
-    Icon = "user"
+-- Misc Tab with settings icon
+local MiscTab = Window:AddTab({
+    Title = "Settings",
+    Icon = "settings",  -- Lucide icon name
+    Section = "Misc"
 })
 
-local VisualTab = Window:AddTab({
-    Title = "Visual", 
-    Section = "Visual",
-    Icon = "eye"
-})
+-- Add components to Main Tab
+Window:AddSection({Name = "Player Options", Tab = MainTab})
 
-local FunTab = Window:AddTab({
-    Title = "Fun", 
-    Section = "Fun",
-    Icon = "eye"
-})
-
--- Player Tab Components
-Window:AddSection({
-    Name = "Player Settings", 
-    Tab = PlayerTab
+Window:AddButton({
+    Title = "God Mode",
+    Description = "Become invincible",
+    Tab = MainTab,
+    Callback = function()
+        print("God Mode activated!")
+        Window:Notify({
+            Title = "Success",
+            Description = "God Mode enabled",
+            Duration = 3
+        })
+    end
 })
 
 Window:AddToggle({
-    Title = "God Mode",
-    Description = "Become invincible to damage",
+    Title = "Speed Hack",
+    Description = "Increase movement speed",
     Default = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        if Value then
-            game.Players.LocalPlayer.Character.Humanoid.MaxHealth = math.huge
-            game.Players.LocalPlayer.Character.Humanoid.Health = math.huge
-        else
-            game.Players.LocalPlayer.Character.Humanoid.MaxHealth = 100
-            game.Players.LocalPlayer.Character.Humanoid.Health = 100
-        end
+    Tab = MainTab,
+    Callback = function(value)
+        print("Speed Hack:", value)
     end
 })
 
@@ -70,152 +77,124 @@ Window:AddSlider({
     Description = "Adjust your movement speed",
     MaxValue = 100,
     AllowDecimals = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    Tab = MainTab,
+    Callback = function(value)
+        print("Walk Speed set to:", value)
     end
 })
 
-Window:AddSlider({
-    Title = "Jump Power",
-    Description = "Change your jump height",
-    MaxValue = 100,
-    AllowDecimals = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+-- Add components to Combat Tab
+Window:AddSection({Name = "Combat Features", Tab = CombatTab})
+
+Window:AddToggle({
+    Title = "Aimbot",
+    Description = "Auto aim at enemies",
+    Default = true,
+    Tab = CombatTab,
+    Callback = function(value)
+        print("Aimbot:", value)
     end
 })
 
--- Visual Tab Components
-Window:AddSection({
-    Name = "Visual Effects", 
-    Tab = VisualTab
+Window:AddKeybind({
+    Title = "Trigger Bot",
+    Description = "Auto shoot when aiming",
+    Tab = CombatTab,
+    Callback = function(key)
+        print("Trigger Bot keybind:", key.KeyCode.Name)
+    end
+})
+
+Window:AddDropdown({
+    Title = "Target Selection",
+    Description = "Choose targeting method",
+    Options = {"Closest", "Farthest", "Highest Health", "Lowest Health"},
+    Tab = CombatTab,
+    Callback = function(option)
+        print("Target selection:", option)
+    end
+})
+
+-- Add components to Visuals Tab
+Window:AddSection({Name = "Visual Settings", Tab = VisualsTab})
+
+Window:AddToggle({
+    Title = "ESP",
+    Description = "See players through walls",
+    Default = false,
+    Tab = VisualsTab,
+    Callback = function(value)
+        print("ESP:", value)
+    end
 })
 
 Window:AddToggle({
-    Title = "Fullbright",
-    Description = "Make the entire game brighter",
+    Title = "Wallhack",
+    Description = "See through walls",
     Default = false,
-    Tab = VisualTab,
-    Callback = function(Value)
-        if Value then
-            game.Lighting.Ambient = Color3.new(1, 1, 1)
-            game.Lighting.Brightness = 2
-        else
-            game.Lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
-            game.Lighting.Brightness = 1
-        end
-    end
-})
-
-Window:AddToggle({
-    Title = "Hide Names",
-    Description = "Hides player names above heads",
-    Default = false,
-    Tab = VisualTab,
-    Callback = function(Value)
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer and player.Character then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.DisplayName = Value and "" or player.Name
-                end
-            end
-        end
-    end
-})
-
--- Fun Tab Components
-Window:AddSection({
-    Name = "Fun Stuff", 
-    Tab = FunTab
-})
-
-Window:AddButton({
-    Title = "Dance",
-    Description = "Make your character dance",
-    Tab = FunTab,
-    Callback = function()
-        local humanoid = game.Players.LocalPlayer.Character.Humanoid
-        local danceAnimation = Instance.new("Animation")
-        danceAnimation.AnimationId = "rbxassetid://35654637"
-        humanoid:LoadAnimation(danceAnimation):Play()
-    end
-})
-
-Window:AddButton({
-    Title = "Spin",
-    Description = "Make your character spin",
-    Tab = FunTab,
-    Callback = function()
-        local root = game.Players.LocalPlayer.Character.HumanoidRootPart
-        for i = 1, 36 do
-            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(10), 0)
-            wait(0.05)
-        end
+    Tab = VisualsTab,
+    Callback = function(value)
+        print("Wallhack:", value)
     end
 })
 
 Window:AddInput({
-    Title = "Chat Message",
-    Description = "Type a message to send in chat",
-    Tab = FunTab,
-    Callback = function(Text)
-        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Text, "All")
+    Title = "ESP Color",
+    Description = "Enter hex color (#RRGGBB)",
+    Tab = VisualsTab,
+    Callback = function(text)
+        print("ESP Color set to:", text)
     end
 })
 
--- Information section
-Window:AddSection({
-    Name = "Information", 
-    Tab = PlayerTab
-})
+-- Add components to Misc Tab
+Window:AddSection({Name = "Configuration", Tab = MiscTab})
 
 Window:AddParagraph({
-    Title = "Welcome to Player Utilities",
-    Description = "This UI provides various tools to enhance your gameplay experience. All features are safe to use and easy to understand.",
-    Tab = PlayerTab
-})
-
--- Show welcome notification
-Window:Notify({
-    Title = "UI Loaded Successfully",
-    Description = "Player Utilities is now ready to use!",
-    Duration = 3
-})
-
--- Settings Tab (optional)
-local SettingsTab = Window:AddTab({
-    Title = "Settings",
-    Icon = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/settings.svg"
-})
-
-Window:AddSection({
-    Name = "UI Settings",
-    Tab = SettingsTab
+    Title = "UI Settings",
+    Description = "Customize the interface appearance",
+    Tab = MiscTab
 })
 
 Window:AddDropdown({
-    Title = "UI Theme",
-    Description = "Change the appearance of the UI",
+    Title = "Theme",
+    Description = "Change UI theme",
     Options = {"Dark", "Light", "Void"},
-    Tab = SettingsTab,
-    Callback = function(Value)
-        Window:SetTheme(Value)
+    Tab = MiscTab,
+    Callback = function(theme)
+        Window:SetSetting("Theme", theme)
+        print("Theme changed to:", theme)
     end
 })
 
-Window:AddSlider({
-    Title = "UI Transparency",
-    Description = "Adjust how transparent the UI appears",
-    MaxValue = 1,
-    AllowDecimals = true,
-    DecimalAmount = 2,
-    Tab = SettingsTab,
-    Callback = function(Value)
-        Window:SetSetting("Transparency", Value)
+Window:AddButton({
+    Title = "Reset Settings",
+    Description = "Restore default configuration",
+    Tab = MiscTab,
+    Callback = function()
+        print("Settings reset!")
+        Window:Notify({
+            Title = "Reset Complete",
+            Description = "All settings restored to default",
+            Duration = 2
+        })
     end
 })
 
-print("Player Utilities UI loaded successfully!")
+-- Demo changing settings
+task.wait(2)
+
+-- Change UI size
+Window:SetSetting("Size", UDim2.new(0, 550, 0, 450))
+
+-- Change transparency
+Window:SetSetting("Transparency", 0.05)
+
+-- Show success notification
+Window:Notify({
+    Title = "UI Loaded",
+    Description = "Demo interface ready!",
+    Duration = 3
+})
+
+print("UI Library demo loaded successfully!")
