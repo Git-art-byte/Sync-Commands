@@ -30,30 +30,31 @@ Window:AddTabSection({
 -- Create tabs with different icons (using Roblox image IDs)
 local MainTab = Window:AddTab({
     Title = "Home",
-    Icon = 3926305904, -- Home icon ID
+    Icon = 121347041469488, -- Home icon ID
     Section = "Main Features"
 })
 
 local CombatTab = Window:AddTab({
     Title = "Combat",
-    Icon = 3926307971, -- Sword icon ID
+    Icon = 124727329171887, -- Sword icon ID
     Section = "Main Features"
 })
 
 local MovementTab = Window:AddTab({
     Title = "Movement",
-    Icon = 3926311105, -- Speed icon ID
+    Icon = 17132521986, -- User icon ID
     Section = "Main Features"
 })
 
 local SettingsTab = Window:AddTab({
     Title = "Settings",
-    Icon = 3926305904, -- Settings icon ID
+    Icon = 17824369886, -- Settings icon ID
     Section = "Settings"
 })
 
 local InfoTab = Window:AddTab({
     Title = "Info" -- No icon
+    Icon = 11780939142 -- Info icon ID
 })
 
 -- Variables to store states
