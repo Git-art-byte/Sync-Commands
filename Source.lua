@@ -20,8 +20,8 @@ end
 --// Important 
 local Setup = {
 	Keybind = Enum.KeyCode.LeftControl,
-	Transparency = 0.09,
-	ThemeMode = "Dark",
+	Transparency = 0.15,
+	ThemeMode = "Void",
 	Size = nil,
 	Font = Enum.Font.GothamBold,
 }
