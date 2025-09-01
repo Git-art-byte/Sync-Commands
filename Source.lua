@@ -3,6 +3,7 @@
 	Made by Late
 	Updated with Gotham Bold Font
 	Updated with Roblox Image/Decal ID Support
+	Updated with Dropdown Theme Colors
 ]]
 
 --// Connections
@@ -24,6 +25,7 @@ local Setup = {
 	ThemeMode = "Void",
 	Size = nil,
 	Font = Enum.Font.GothamBold,
+	DropdownColor = nil, -- Custom dropdown color override
 }
 
 local Theme = { --// (Dark Theme)
@@ -44,6 +46,62 @@ local Theme = { --// (Dark Theme)
 
 	--// Image:
 	Icon = Color3.fromRGB(220, 220, 220),
+	
+	--// Dropdown specific colors
+	DropdownPrimary = Color3.fromRGB(30, 30, 30),
+	DropdownSecondary = Color3.fromRGB(35, 35, 35),
+	DropdownAccent = Color3.fromRGB(153, 155, 255),
+}
+
+--// Theme Presets
+local ThemePresets = {
+	Dark = {
+		Primary = Color3.fromRGB(30, 30, 30),
+		Secondary = Color3.fromRGB(35, 35, 35),
+		Component = Color3.fromRGB(40, 40, 40),
+		Interactables = Color3.fromRGB(45, 45, 45),
+		Tab = Color3.fromRGB(200, 200, 200),
+		Title = Color3.fromRGB(240,240,240),
+		Description = Color3.fromRGB(200,200,200),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Outline = Color3.fromRGB(40, 40, 40),
+		Icon = Color3.fromRGB(220, 220, 220),
+		DropdownPrimary = Color3.fromRGB(30, 30, 30),
+		DropdownSecondary = Color3.fromRGB(35, 35, 35),
+		DropdownAccent = Color3.fromRGB(153, 155, 255),
+	},
+	
+	Light = {
+		Primary = Color3.fromRGB(232, 232, 232),
+		Secondary = Color3.fromRGB(255, 255, 255),
+		Component = Color3.fromRGB(245, 245, 245),
+		Interactables = Color3.fromRGB(235, 235, 235),
+		Tab = Color3.fromRGB(50, 50, 50),
+		Title = Color3.fromRGB(0, 0, 0),
+		Description = Color3.fromRGB(100, 100, 100),
+		Shadow = Color3.fromRGB(255, 255, 255),
+		Outline = Color3.fromRGB(210, 210, 210),
+		Icon = Color3.fromRGB(100, 100, 100),
+		DropdownPrimary = Color3.fromRGB(255, 255, 255),
+		DropdownSecondary = Color3.fromRGB(245, 245, 245),
+		DropdownAccent = Color3.fromRGB(100, 120, 255),
+	},
+	
+	Void = {
+		Primary = Color3.fromRGB(15, 15, 15),
+		Secondary = Color3.fromRGB(20, 20, 20),
+		Component = Color3.fromRGB(25, 25, 25),
+		Interactables = Color3.fromRGB(30, 30, 30),
+		Tab = Color3.fromRGB(200, 200, 200),
+		Title = Color3.fromRGB(240,240,240),
+		Description = Color3.fromRGB(200,200,200),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Outline = Color3.fromRGB(40, 40, 40),
+		Icon = Color3.fromRGB(220, 220, 220),
+		DropdownPrimary = Color3.fromRGB(15, 15, 15),
+		DropdownSecondary = Color3.fromRGB(20, 20, 20),
+		DropdownAccent = Color3.fromRGB(120, 100, 255),
+	}
 }
 
 --// Services & Functions
@@ -617,7 +675,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		
 		local Set = function(Value)
 			if Value then
-				Tween(Main,   .2, { BackgroundColor3 = Color3.fromRGB(153, 155, 255) });
+				Tween(Main,   .2, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Accent) or Theme.DropdownAccent });
 				Tween(Circle, .2, { BackgroundColor3 = Color3.fromRGB(255, 255, 255), Position = UDim2.new(1, -16, 0.5, 0) });
 			else
 				Tween(Main,   .2, { BackgroundColor3 = Theme.Interactables });
@@ -701,8 +759,18 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			local Example = Clone(Examples["DropdownExample"]);
 			local Buttons = Example["Top"]["Buttons"];
 
+			-- Apply dropdown theme colors
+			SetProperty(Example, { 
+				BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Primary) or Theme.DropdownPrimary,
+				Parent = Window 
+			});
+			
+			-- Apply theme to dropdown outline
+			if Example:FindFirstChild("UIStroke") then
+				Example.UIStroke.Color = Theme.Outline
+			end
+
 			Tween(BG, .25, { BackgroundTransparency = 0.6 });
-			SetProperty(Example, { Parent = Window });
 			Animations:Open(Example, 0, true)
 
 			for Index, Button in next, Buttons:GetChildren() do
@@ -723,6 +791,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 				local Title, Description = Options:GetLabels(Button);
 				local Selected = Button["Value"];
 
+				-- Apply dropdown theme colors to buttons
+				Button.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
+
 				Animations:Component(Button);
 				SetProperty(Title, { Text = Index });
 				SetProperty(Button, { Parent = Example.ScrollingFrame, Visible = true });
@@ -732,17 +803,17 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 					local NewValue = not Selected.Value 
 
 					if NewValue then
-						Tween(Button, .25, { BackgroundColor3 = Theme.Interactables });
+						Tween(Button, .25, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Accent) or Theme.DropdownAccent });
 						Settings.Callback(Option)
 						Text.Text = Index
 
-						for _, Others in next, Example:GetChildren() do
+						for _, Others in next, Example.ScrollingFrame:GetChildren() do
 							if Others:IsA("TextButton") and Others ~= Button then
-								Others.BackgroundColor3 = Theme.Component
+								Others.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
 							end
 						end
 					else
-						Tween(Button, .25, { BackgroundColor3 = Theme.Component });
+						Tween(Button, .25, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary });
 					end
 
 					Selected.Value = NewValue
@@ -843,6 +914,38 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			Parent = Settings.Tab,
 			Visible = true,
 		})
+	end
+
+	--// New function to set dropdown color by theme name
+	function Options:DropdownColor(themeName)
+		if type(themeName) == "string" and ThemePresets[themeName] then
+			local selectedTheme = ThemePresets[themeName]
+			Setup.DropdownColor = {
+				Primary = selectedTheme.DropdownPrimary,
+				Secondary = selectedTheme.DropdownSecondary,
+				Accent = selectedTheme.DropdownAccent
+			}
+			
+			-- Update existing dropdowns if any
+			for _, descendant in pairs(Window:GetDescendants()) do
+				if descendant.Name == "DropdownExample" and descendant:IsA("CanvasGroup") then
+					descendant.BackgroundColor3 = selectedTheme.DropdownPrimary
+					
+					-- Update dropdown buttons
+					for _, child in pairs(descendant:GetDescendants()) do
+						if child:IsA("TextButton") and child:FindFirstChild("Value") then
+							if child.Value.Value then
+								child.BackgroundColor3 = selectedTheme.DropdownAccent
+							else
+								child.BackgroundColor3 = selectedTheme.DropdownSecondary
+							end
+						end
+					end
+				end
+			end
+		else
+			warn("DropdownColor expects a theme name: 'Dark', 'Light', or 'Void'")
+		end
 	end
 
 	local Themes = {
@@ -948,7 +1051,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			end,
 
 			["DropdownExample"] = function(Label)
-				Label.BackgroundColor3 = Theme.Secondary
+				Label.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Primary) or Theme.DropdownPrimary
 			end,
 
 			["Underline"] = function(Label)
@@ -973,6 +1076,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			["TextButton"] = function(Label)
 				if Label:FindFirstChild("Labels") then
 					Label.BackgroundColor3 = Theme.Component
+				elseif Label.Parent and Label.Parent.Name == "ScrollingFrame" and Label.Parent.Parent and Label.Parent.Parent.Name == "DropdownExample" then
+					-- Dropdown button styling
+					Label.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
 				end
 				Label.Font = Setup.Font or Enum.Font.GothamBold
 			end,
@@ -991,58 +1097,30 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		-- Handle both string theme names and color tables
 		if type(themeInfo) == "string" then
 			-- String input - check if it's a built-in theme
-			if themeInfo == "Dark" then
-				Theme = {
-					Primary = Color3.fromRGB(30, 30, 30),
-					Secondary = Color3.fromRGB(35, 35, 35),
-					Component = Color3.fromRGB(40, 40, 40),
-					Interactables = Color3.fromRGB(45, 45, 45),
-					Tab = Color3.fromRGB(200, 200, 200),
-					Title = Color3.fromRGB(240,240,240),
-					Description = Color3.fromRGB(200,200,200),
-					Shadow = Color3.fromRGB(0, 0, 0),
-					Outline = Color3.fromRGB(40, 40, 40),
-					Icon = Color3.fromRGB(220, 220, 220),
-				}
-				Setup.ThemeMode = "Dark"
-			elseif themeInfo == "Light" then
-				Theme = {
-					Primary = Color3.fromRGB(232, 232, 232),
-					Secondary = Color3.fromRGB(255, 255, 255),
-					Component = Color3.fromRGB(245, 245, 245),
-					Interactables = Color3.fromRGB(235, 235, 235),
-					Tab = Color3.fromRGB(50, 50, 50),
-					Title = Color3.fromRGB(0, 0, 0),
-					Description = Color3.fromRGB(100, 100, 100),
-					Shadow = Color3.fromRGB(255, 255, 255),
-					Outline = Color3.fromRGB(210, 210, 210),
-					Icon = Color3.fromRGB(100, 100, 100),
-				}
-				Setup.ThemeMode = "Light"
-			elseif themeInfo == "Void" then
-				Theme = {
-					Primary = Color3.fromRGB(15, 15, 15),
-					Secondary = Color3.fromRGB(20, 20, 20),
-					Component = Color3.fromRGB(25, 25, 25),
-					Interactables = Color3.fromRGB(30, 30, 30),
-					Tab = Color3.fromRGB(200, 200, 200),
-					Title = Color3.fromRGB(240,240,240),
-					Description = Color3.fromRGB(200,200,200),
-					Shadow = Color3.fromRGB(0, 0, 0),
-					Outline = Color3.fromRGB(40, 40, 40),
-					Icon = Color3.fromRGB(220, 220, 220),
-				}
-				Setup.ThemeMode = "Void"
+			if ThemePresets[themeInfo] then
+				Theme = ThemePresets[themeInfo]
+				Setup.ThemeMode = themeInfo
 			else
 				warn("Theme '" .. themeInfo .. "' not found! Using default Dark theme.")
+				Theme = ThemePresets["Dark"]
 				Setup.ThemeMode = "Dark"
 			end
 		elseif type(themeInfo) == "table" then
-			-- Table input - use custom theme
+			-- Table input - use custom theme, ensure dropdown colors exist
 			Theme = themeInfo
+			if not Theme.DropdownPrimary then
+				Theme.DropdownPrimary = Theme.Primary or Color3.fromRGB(30, 30, 30)
+			end
+			if not Theme.DropdownSecondary then
+				Theme.DropdownSecondary = Theme.Secondary or Color3.fromRGB(35, 35, 35)
+			end
+			if not Theme.DropdownAccent then
+				Theme.DropdownAccent = Color3.fromRGB(153, 155, 255)
+			end
 			Setup.ThemeMode = "Custom"
 		else
 			warn("Invalid theme input type. Using default Dark theme.")
+			Theme = ThemePresets["Dark"]
 			Setup.ThemeMode = "Dark"
 		end
 
@@ -1082,7 +1160,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 	--// Changing Settings
 
-	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme, Font
+	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme, Font, DropdownColor
 		if Setting == "Size" then
 			
 			Window.Size = Value
@@ -1131,6 +1209,10 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		elseif Setting == "Keybind" then
 			
 			Setup.Keybind = Value
+			
+		elseif Setting == "DropdownColor" then
+			
+			Options:DropdownColor(Value)
 			
 		else
 			warn("Tried to change a setting that doesn't exist or isn't available to change.")
