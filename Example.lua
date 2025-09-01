@@ -11,7 +11,7 @@ local Window = Library:CreateWindow({
     Title = "My Awesome Script",
     Size = UDim2.fromOffset(500, 400),
     Transparency = 0.2,
-    MinimizeKeybind = Enum.KeyCode.RightControl,
+    MinimizeKeybind = Enum.KeyCode.LeftControl,
     Blurring = true,
     Theme = "Void" -- Options: "Dark", "Light", "Void", or custom table
 })
