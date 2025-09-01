@@ -5,7 +5,7 @@ local Window = Library:CreateWindow({
     Size = UDim2.fromOffset(600, 400),
     Transparency = 0.1,
     Blurring = true,
-    Theme = "Dark"
+    Theme = "Void"
 })
 
 -- Create sections
@@ -28,19 +28,19 @@ Window:AddTabSection({
 local PlayerTab = Window:AddTab({
     Title = "Player", 
     Section = "Player",
-    Icon = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/user.svg"
+    Icon = "user"
 })
 
 local VisualTab = Window:AddTab({
     Title = "Visual", 
     Section = "Visual",
-    Icon = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/eye.svg"
+    Icon = "eye"
 })
 
 local FunTab = Window:AddTab({
     Title = "Fun", 
     Section = "Fun",
-    Icon = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/sparkles.svg"
+    Icon = "eye"
 })
 
 -- Player Tab Components
