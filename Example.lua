@@ -3,7 +3,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-a
 local Window = Library:CreateWindow({
     Title = "Player Utilities",
     Size = UDim2.fromOffset(600, 400),
-    Transparency = 0.1,
+    Transparency = 0.15,
     Blurring = true,
     Theme = "Void"
 })
