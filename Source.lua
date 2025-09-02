@@ -1118,8 +1118,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	}
 
 	-- In your SetTheme function, modify the theme application part:
-
-function Options:SetTheme(themeInfo)
+	function Options:SetTheme(themeInfo)
 	-- Handle both string theme names and color tables
 	if type(themeInfo) == "string" then
 		-- String input - check if it's a built-in theme
@@ -1177,15 +1176,13 @@ function Options:SetTheme(themeInfo)
 			Descendant.Font = Setup.Font or Enum.Font.GothamBold
 		end
 
-		-- Skip window control buttons during theme application
-		local isWindowButton = (Descendant.Name == "Close" or Descendant.Name == "Minimize" or Descendant.Name == "Maximize") and 
-							   Descendant.Parent == windowButtons
-
-		if not isWindowButton then
-			if Name then
-				Name(Descendant);
-			elseif Class then
-				Class(Descendant);
+		-- Apply theme functions (the window button functions will set the correct colors)
+		if Name then
+			Name(Descendant)
+		elseif Class then
+			-- Skip window control buttons in the Classes theme application
+			if not (Descendant.Name == "Close" or Descendant.Name == "Minimize" or Descendant.Name == "Maximize") then
+				Class(Descendant)
 			end
 		end
 	end
@@ -1196,8 +1193,8 @@ function Options:SetTheme(themeInfo)
 			windowButtons[buttonName].BackgroundColor3 = color
 		end
 	end
-	end
-
+end
+			
 	-- Font management function
 	function Options:SetFont(fontType)
 		fontType = fontType or Enum.Font.GothamBold
