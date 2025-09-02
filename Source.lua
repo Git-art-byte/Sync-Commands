@@ -1117,68 +1117,85 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		},
 	}
 
-	function Options:SetTheme(themeInfo)
-		-- Handle both string theme names and color tables
-		if type(themeInfo) == "string" then
-			-- String input - check if it's a built-in theme
-			if ThemePresets[themeInfo] then
-				Theme = ThemePresets[themeInfo]
-				Setup.ThemeMode = themeInfo
-			else
-				warn("Theme '" .. themeInfo .. "' not found! Using default Dark theme.")
-				Theme = ThemePresets["Dark"]
-				Setup.ThemeMode = "Dark"
-			end
-		elseif type(themeInfo) == "table" then
-			-- Table input - use custom theme, ensure dropdown colors exist
-			Theme = themeInfo
-			if not Theme.DropdownPrimary then
-				Theme.DropdownPrimary = Theme.Primary or Color3.fromRGB(30, 30, 30)
-			end
-			if not Theme.DropdownSecondary then
-				Theme.DropdownSecondary = Theme.Secondary or Color3.fromRGB(35, 35, 35)
-			end
-			if not Theme.DropdownAccent then
-				Theme.DropdownAccent = Color3.fromRGB(153, 155, 255)
-			end
-			Setup.ThemeMode = "Custom"
+	-- In your SetTheme function, modify the theme application part:
+
+function Options:SetTheme(themeInfo)
+	-- Handle both string theme names and color tables
+	if type(themeInfo) == "string" then
+		-- String input - check if it's a built-in theme
+		if ThemePresets[themeInfo] then
+			Theme = ThemePresets[themeInfo]
+			Setup.ThemeMode = themeInfo
 		else
-			warn("Invalid theme input type. Using default Dark theme.")
+			warn("Theme '" .. themeInfo .. "' not found! Using default Dark theme.")
 			Theme = ThemePresets["Dark"]
 			Setup.ThemeMode = "Dark"
 		end
+	elseif type(themeInfo) == "table" then
+		-- Table input - use custom theme, ensure dropdown colors exist
+		Theme = themeInfo
+		if not Theme.DropdownPrimary then
+			Theme.DropdownPrimary = Theme.Primary or Color3.fromRGB(30, 30, 30)
+		end
+		if not Theme.DropdownSecondary then
+			Theme.DropdownSecondary = Theme.Secondary or Color3.fromRGB(35, 35, 35)
+		end
+		if not Theme.DropdownAccent then
+			Theme.DropdownAccent = Color3.fromRGB(153, 155, 255)
+		end
+		Setup.ThemeMode = "Custom"
+	else
+		warn("Invalid theme input type. Using default Dark theme.")
+		Theme = ThemePresets["Dark"]
+		Setup.ThemeMode = "Dark"
+	end
 
-		-- Apply the theme to all UI elements
-		Window.BackgroundColor3 = Theme.Primary
-		Holder.BackgroundColor3 = Theme.Secondary
-		Window.UIStroke.Color = Theme.Shadow
+	-- Apply the theme to main window elements
+	Window.BackgroundColor3 = Theme.Primary
+	Holder.BackgroundColor3 = Theme.Secondary
+	Window.UIStroke.Color = Theme.Shadow
 
-		for Index, Descendant in next, Screen:GetDescendants() do
-			local Name, Class =  Themes.Names[Descendant.Name],  Themes.Classes[Descendant.ClassName]
+	-- Store the original window control button colors before applying theme
+	local windowButtons = Sidebar.Top.Buttons
+	local originalColors = {}
+	
+	if windowButtons:FindFirstChild("Close") then
+		originalColors.Close = Color3.fromRGB(255, 96, 92) -- Red
+	end
+	if windowButtons:FindFirstChild("Minimize") then
+		originalColors.Minimize = Color3.fromRGB(255, 189, 68) -- Yellow
+	end
+	if windowButtons:FindFirstChild("Maximize") then
+		originalColors.Maximize = Color3.fromRGB(39, 201, 63) -- Green
+	end
 
-			-- Apply Gotham Bold font to all text objects
-			if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") or Descendant:IsA("TextBox") then
-				Descendant.Font = Setup.Font or Enum.Font.GothamBold
-			end
+	for Index, Descendant in next, Screen:GetDescendants() do
+		local Name, Class = Themes.Names[Descendant.Name], Themes.Classes[Descendant.ClassName]
 
+		-- Apply Gotham Bold font to all text objects
+		if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") or Descendant:IsA("TextBox") then
+			Descendant.Font = Setup.Font or Enum.Font.GothamBold
+		end
+
+		-- Skip window control buttons during theme application
+		local isWindowButton = (Descendant.Name == "Close" or Descendant.Name == "Minimize" or Descendant.Name == "Maximize") and 
+							   Descendant.Parent == windowButtons
+
+		if not isWindowButton then
 			if Name then
 				Name(Descendant);
 			elseif Class then
 				Class(Descendant);
 			end
 		end
-		
-		-- Force window control buttons to maintain their colors
-		local windowButtons = Sidebar.Top.Buttons
-		if windowButtons:FindFirstChild("Close") then
-			windowButtons.Close.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Red
+	end
+	
+	-- Restore original window control button colors after theme application
+	for buttonName, color in pairs(originalColors) do
+		if windowButtons:FindFirstChild(buttonName) then
+			windowButtons[buttonName].BackgroundColor3 = color
 		end
-		if windowButtons:FindFirstChild("Minimize") then
-			windowButtons.Minimize.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Yellow
-		end
-		if windowButtons:FindFirstChild("Maximize") then
-			windowButtons.Maximize.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Green
-		end
+	end
 	end
 
 	-- Font management function
