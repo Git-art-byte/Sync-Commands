@@ -1118,7 +1118,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	}
 
 	-- In your SetTheme function, modify the theme application part:
-	function Options:SetTheme(themeInfo)
+	-- Replace your SetTheme function with this corrected version:
+
+function Options:SetTheme(themeInfo)
 	-- Handle both string theme names and color tables
 	if type(themeInfo) == "string" then
 		-- String input - check if it's a built-in theme
@@ -1154,20 +1156,6 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	Holder.BackgroundColor3 = Theme.Secondary
 	Window.UIStroke.Color = Theme.Shadow
 
-	-- Store the original window control button colors before applying theme
-	local windowButtons = Sidebar.Top.Buttons
-	local originalColors = {}
-	
-	if windowButtons:FindFirstChild("Close") then
-		originalColors.Close = Color3.fromRGB(255, 96, 92) -- Red
-	end
-	if windowButtons:FindFirstChild("Minimize") then
-		originalColors.Minimize = Color3.fromRGB(255, 189, 68) -- Yellow
-	end
-	if windowButtons:FindFirstChild("Maximize") then
-		originalColors.Maximize = Color3.fromRGB(39, 201, 63) -- Green
-	end
-
 	for Index, Descendant in next, Screen:GetDescendants() do
 		local Name, Class = Themes.Names[Descendant.Name], Themes.Classes[Descendant.ClassName]
 
@@ -1176,24 +1164,60 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			Descendant.Font = Setup.Font or Enum.Font.GothamBold
 		end
 
-		-- Apply theme functions (the window button functions will set the correct colors)
+		-- Apply Name-based themes first (this includes window control buttons)
 		if Name then
 			Name(Descendant)
-		elseif Class then
-			-- Skip window control buttons in the Classes theme application
-			if not (Descendant.Name == "Close" or Descendant.Name == "Minimize" or Descendant.Name == "Maximize") then
+		elseif Class and Descendant.ClassName == "TextButton" then
+			-- Special handling for TextButton class to avoid overriding window control buttons
+			local isWindowButton = (Descendant.Name == "Close" or Descendant.Name == "Minimize" or Descendant.Name == "Maximize") and 
+								   Descendant.Parent and Descendant.Parent.Parent and 
+								   Descendant.Parent.Parent == Sidebar and Descendant.Parent.Name == "Buttons"
+			
+			if not isWindowButton then
 				Class(Descendant)
 			end
+		elseif Class then
+			-- Apply other class-based themes normally
+			Class(Descendant)
 		end
 	end
 	
-	-- Restore original window control button colors after theme application
-	for buttonName, color in pairs(originalColors) do
-		if windowButtons:FindFirstChild(buttonName) then
-			windowButtons[buttonName].BackgroundColor3 = color
+	-- Force set window control button colors as a final step (insurance)
+	local windowButtons = Sidebar and Sidebar:FindFirstChild("Top") and Sidebar.Top:FindFirstChild("Buttons")
+	if windowButtons then
+		local closeBtn = windowButtons:FindFirstChild("Close")
+		local minimizeBtn = windowButtons:FindFirstChild("Minimize") 
+		local maximizeBtn = windowButtons:FindFirstChild("Maximize")
+		
+		if closeBtn and closeBtn:IsA("TextButton") then
+			closeBtn.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Red
+		end
+		if minimizeBtn and minimizeBtn:IsA("TextButton") then
+			minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Yellow
+		end
+		if maximizeBtn and maximizeBtn:IsA("TextButton") then
+			maximizeBtn.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Green
 		end
 	end
 end
+
+
+-- Also, make sure your Themes.Classes["TextButton"] function looks like this:
+
+["TextButton"] = function(Label)
+	-- Skip window control buttons completely
+	if Label.Name == "Close" or Label.Name == "Minimize" or Label.Name == "Maximize" then
+		return -- Don't apply any styling to window control buttons
+	end
+	
+	if Label:FindFirstChild("Labels") then
+		Label.BackgroundColor3 = Theme.Component
+	elseif Label.Parent and Label.Parent.Name == "ScrollingFrame" and Label.Parent.Parent and Label.Parent.Parent.Name == "DropdownExample" then
+		-- Dropdown button styling
+		Label.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
+	end
+	Label.Font = Setup.Font or Enum.Font.GothamBold
+	end
 			
 	-- Font management function
 	function Options:SetFont(fontType)
