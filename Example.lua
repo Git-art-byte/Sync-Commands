@@ -37,7 +37,7 @@ Window:AddDropdown({
 		["Gotham Bold"] = Enum.Font.GothamBold,
 		["Roboto"] = Enum.Font.Roboto,
 		["Arial"] = Enum.Font.Arial,
-		["SourceSansPro"] = Enum.Font.SourceSansPro
+		["Sarpanch"] = Enum.Font.Sarpanch	
 	},
 	Tab = MainTab,
 	Callback = function(Font)
@@ -165,7 +165,7 @@ Window:AddSlider({
 	Callback = function(Value)
 		Window:Notify({
 			Title = "Slider Adjusted",
-			Description = "Value set to: " .. Value,
+			Description = "Slider set to: " .. Value,
 			Duration = 3
 		})
 	end
