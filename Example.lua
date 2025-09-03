@@ -6,14 +6,14 @@
 -- Load the UI library using loadstring
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))() -- Replace with actual URL to Source.lua
 
--- Create a window
+-- Create a window with Void theme
 local Window = Library:CreateWindow({
 	Title = "UI Library Test",
 	Size = UDim2.new(0, 600, 0, 400),
 	Transparency = 0.2,
 	MinimizeKeybind = Enum.KeyCode.LeftControl,
 	Blurring = true,
-	Theme = "Dark"
+	Theme = "Void"
 })
 
 -- Add a tab section
@@ -25,7 +25,7 @@ Window:AddTabSection({
 -- Add a tab
 local MainTab = Window:AddTab({
 	Title = "Main",
-	Icon = "rbxassetid://6034835819", -- Example icon
+	Icon = "6034835819", -- Example icon (uses FormatImageId)
 	Section = "MainSection"
 })
 
@@ -45,6 +45,27 @@ Window:AddDropdown({
 		Window:Notify({
 			Title = "Font Changed",
 			Description = "UI font set to " .. tostring(Font),
+			Duration = 3
+		})
+	end
+})
+
+-- Add a theme dropdown to test theme switching
+Window:AddDropdown({
+	Title = "Theme Selector",
+	Description = "Choose a theme for the UI",
+	Options = {
+		["Void"] = "Void",
+		["Dark"] = "Dark",
+		["Light"] = "Light"
+	},
+	Tab = MainTab,
+	Callback = function(Theme)
+		Window:SetTheme(Theme)
+		Window:DropdownColor(Theme) -- Apply dropdown colors for consistency
+		Window:Notify({
+			Title = "Theme Changed",
+			Description = "UI theme set to " .. Theme,
 			Duration = 3
 		})
 	end
@@ -163,3 +184,5 @@ Window:Notify({
 	Description = "Explore the UI library features in this demo! For educational purposes only.",
 	Duration = 5
 })
+
+print("UI Library loaded with Void theme")
