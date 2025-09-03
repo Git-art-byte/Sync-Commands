@@ -234,7 +234,6 @@ function Animations:Open(Window: CanvasGroup, Transparency: number, UseCurrentSi
 	local Multiplied = Multiply(Original, 1.1)
 	local Shadow = Window:FindFirstChildOfClass("UIStroke")
 
-
 	SetProperty(Shadow, { Transparency = 1 })
 	SetProperty(Window, {
 		Size = Multiplied,
@@ -269,7 +268,6 @@ function Animations:Close(Window: CanvasGroup)
 	Window.Visible = false
 end
 
-
 function Animations:Component(Component: any, Custom: boolean)	
 	Connect(Component.InputBegan, function() 
 		if Custom then
@@ -289,7 +287,6 @@ function Animations:Component(Component: any, Custom: boolean)
 end
 
 --// Library [Window]
-
 function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparency: number, MinimizeKeybind: Enum.KeyCode?, Blurring: boolean, Theme: string })
 	local Window = Clone(Screen:WaitForChild("Main"));
 	local Sidebar = Window:FindFirstChild("Sidebar");
@@ -301,7 +298,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	local Examples = {};
 	local Opened = true;
 	local Maximized = false;
-	local BlurEnabled = false
+	local BlurEnabled = false;
+	local CurrentFont = Enum.Font.GothamBold; -- Track the current font
 
 	for Index, Example in next, Window:GetDescendants() do
 		if Example.Name:find("Example") and not Examples[Example.Name] then
@@ -377,7 +375,6 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	end)
 
 	--// Tab Functions
-
 	function Options:SetTab(Name: string)
 		for Index, Button in next, Tab:GetChildren() do
 			if Button:IsA("TextButton") then
@@ -432,7 +429,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			Text = Settings.Name,
 			Name = Settings.Name,
 			LayoutOrder = Settings.Order,
-			Visible = true
+			Visible = true,
+			Font = CurrentFont
 		});
 	end
 
@@ -453,7 +451,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		end
 
 		StoredInfo["Tabs"][Settings.Title] = { Tab }
-		SetProperty(Tab["TextLabel"], { Text = Settings.Title });
+		SetProperty(Tab["TextLabel"], { Text = Settings.Title, Font = CurrentFont });
 
 		SetProperty(Main, { 
 			Parent = MainExample.Parent,
@@ -475,14 +473,13 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	end
 	
 	--// Notifications
-	
 	function Options:Notify(Settings: { Title: string, Description: string, Duration: number }) 
 		local Notification = Clone(Components["Notification"]);
 		local Title, Description = Options:GetLabels(Notification);
 		local Timer = Notification["Timer"];
 		
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Title, { Text = Settings.Title, Font = CurrentFont });
+		SetProperty(Description, { Text = Settings.Description, Font = CurrentFont });
 		SetProperty(Notification, {
 			Parent = Screen["Frame"],
 		})
@@ -500,10 +497,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 	end
 
 	--// Component Functions
-
 	function Options:GetLabels(Component)
 		local Labels = Component:FindFirstChild("Labels")
-
 		return Labels.Title, Labels.Description
 	end
 
@@ -513,6 +508,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 			Text = Settings.Name,
 			Parent = Settings.Tab,
 			Visible = true,
+			Font = CurrentFont
 		})
 	end
 	
@@ -522,8 +518,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 		Connect(Button.MouseButton1Click, Settings.Callback)
 		Animations:Component(Button)
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Title, { Text = Settings.Title, Font = CurrentFont });
+		SetProperty(Description, { Text = Settings.Description, Font = CurrentFont });
 		SetProperty(Button, {
 			Name = Settings.Title,
 			Parent = Settings.Tab,
@@ -545,8 +541,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		end)
 
 		Animations:Component(Input)
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Title, { Text = Settings.Title, Font = CurrentFont });
+		SetProperty(Description, { Text = Settings.Description, Font = CurrentFont });
+		SetProperty(TextBox, { Font = CurrentFont });
 		SetProperty(Input, {
 			Name = Settings.Title,
 			Parent = Settings.Tab,
@@ -583,8 +580,8 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 
 		Animations:Component(Toggle);
 		Set(Settings.Default);
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Title, { Text = Settings.Title, Font = CurrentFont });
+		SetProperty(Description, { Text = Settings.Description, Font = CurrentFont });
 		SetProperty(Toggle, {
 			Name = Settings.Title,
 			Parent = Settings.Tab,
@@ -617,12 +614,14 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 					if table.find(Mouse, InputType) then
 						Settings.Callback(Key);
 						SetProperty(Bind, {
-							Text = tostring(InputType):gsub(Types.Mouse, "MB")
+							Text = tostring(InputType):gsub(Types.Mouse, "MB"),
+							Font = CurrentFont
 						})
 					elseif InputType == Enum.UserInputType.Keyboard then
 						Settings.Callback(Key);
 						SetProperty(Bind, {
-							Text = tostring(Key.KeyCode):gsub(Types.Key, "")
+							Text = tostring(Key.KeyCode):gsub(Types.Key, ""),
+							Font = CurrentFont
 						})
 					end
 				end 
@@ -630,8 +629,9 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 		end)
 
 		Animations:Component(Dropdown);
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Title, { Text = Settings.Title, Font = CurrentFont });
+		SetProperty(Description, { Text = Settings.Description, Font = CurrentFont });
+		SetProperty(Bind, { Font = CurrentFont });
 		SetProperty(Dropdown, {
 			Name = Settings.Title,
 			Parent = Settings.Tab,
@@ -671,7 +671,7 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 				local Selected = Button["Value"];
 
 				Animations:Component(Button);
-				SetProperty(Title, { Text = Index });
+				SetProperty(Title, { Text = Index, Font = CurrentFont });
 				SetProperty(Button, { Parent = Example.ScrollingFrame, Visible = true });
 				Destroy(Description);
 
@@ -684,319 +684,4 @@ function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparen
 						Text.Text = Index
 
 						for _, Others in next, Example:GetChildren() do
-							if Others:IsA("TextButton") and Others ~= Button then
-								Others.BackgroundColor3 = Theme.Component
-							end
-						end
-					else
-						Tween(Button, .25, { BackgroundColor3 = Theme.Component });
-					end
-
-					Selected.Value = NewValue
-					Tween(BG, .25, { BackgroundTransparency = 1 });
-					Animations:Close(Example);
-					task.wait(2)
-					Destroy(Example);
-				end)
-			end
-		end)
-
-		Animations:Component(Dropdown);
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
-		SetProperty(Dropdown, {
-			Name = Settings.Title,
-			Parent = Settings.Tab,
-			Visible = true,
-		})
-	end
-
-	function Options:AddSlider(Settings: { Title: string, Description: string, MaxValue: number, AllowDecimals: boolean, DecimalAmount: number, Tab: Instance, Callback: any }) 
-		local Slider = Clone(Components["Slider"]);
-		local Title, Description = Options:GetLabels(Slider);
-
-		local Main = Slider["Slider"];
-		local Amount = Main["Main"].Input;
-		local Slide = Main["Slide"];
-		local Fire = Slide["Fire"];
-		local Fill = Slide["Highlight"];
-		local Circle = Fill["Circle"];
-
-		local Active = false
-		local Value = 0
-		
-		local SetNumber = function(Number)
-			if Settings.AllowDecimals then
-				local Power = 10 ^ (Settings.DecimalAmount or 2)
-				Number = math.floor(Number * Power + 0.5) / Power
-			else
-				Number = math.round(Number)
-			end
-			
-			return Number
-		end
-
-		local Update = function(Number)
-			local Scale = (Player.Mouse.X - Slide.AbsolutePosition.X) / Slide.AbsoluteSize.X			
-			Scale = (Scale > 1 and 1) or (Scale < 0 and 0) or Scale
-			
-			if Number then
-				Number = (Number > Settings.MaxValue and Settings.MaxValue) or (Number < 0 and 0) or Number
-			end
-			
-			Value = SetNumber(Number or (Scale * Settings.MaxValue))
-			Amount.Text = Value
-			Fill.Size = UDim2.fromScale((Number and Number / Settings.MaxValue) or Scale, 1)
-			Settings.Callback(Value)
-		end
-
-		local Activate = function()
-			Active = true
-
-			repeat task.wait()
-				Update()
-			until not Active
-		end
-		
-		Connect(Amount.FocusLost, function() 
-			Update(tonumber(Amount.Text) or 0)
-		end)
-
-		Connect(Fire.MouseButton1Down, Activate)
-		Connect(Services.Input.InputEnded, function(Input) 
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-				Active = false
-			end
-		end)
-
-		Fill.Size = UDim2.fromScale(Value, 1);
-		Animations:Component(Slider);
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
-		SetProperty(Slider, {
-			Name = Settings.Title,
-			Parent = Settings.Tab,
-			Visible = true,
-		})
-	end
-
-	function Options:AddParagraph(Settings: { Title: string, Description: string, Tab: Instance }) 
-		local Paragraph = Clone(Components["Paragraph"]);
-		local Title, Description = Options:GetLabels(Paragraph);
-
-		SetProperty(Title, { Text = Settings.Title });
-		SetProperty(Description, { Text = Settings.Description });
-		SetProperty(Paragraph, {
-			Parent = Settings.Tab,
-			Visible = true,
-		})
-	end
-
-	local Themes = {
-		Names = {	
-			["Paragraph"] = function(Label)
-				if Label:IsA("TextButton") then
-					Label.BackgroundColor3 = Color(Theme.Component, 5, "Dark");
-				end
-			end,
-			
-			["Title"] = function(Label)
-				if Label:IsA("TextLabel") then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-
-			["Description"] = function(Label)
-				if Label:IsA("TextLabel") then
-					Label.TextColor3 = Theme.Description
-				end
-			end,
-			
-			["Section"] = function(Label)
-				if Label:IsA("TextLabel") then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-
-			["Options"] = function(Label)
-				if Label:IsA("TextLabel") and Label.Parent.Name == "Main" then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-			
-			["Notification"] = function(Label)
-				if Label:IsA("CanvasGroup") then
-					Label.BackgroundColor3 = Theme.Primary
-					Label.UIStroke.Color = Theme.Outline
-				end
-			end,
-
-			["TextLabel"] = function(Label)
-				if Label:IsA("TextLabel") and Label.Parent:FindFirstChild("List") then
-					Label.TextColor3 = Theme.Tab
-				end
-			end,
-
-			["Main"] = function(Label)
-				if Label:IsA("Frame") then
-
-					if Label.Parent == Window then
-						Label.BackgroundColor3 = Theme.Secondary
-					elseif Label.Parent:FindFirstChild("Value") then
-						local Toggle = Label.Parent.Value 
-						local Circle = Label:FindFirstChild("Circle")
-						
-						if not Toggle.Value then
-							Label.BackgroundColor3 = Theme.Interactables
-							Label.Circle.BackgroundColor3 = Theme.Primary
-						end
-					else
-						Label.BackgroundColor3 = Theme.Interactables
-					end
-				elseif Label:FindFirstChild("Padding") then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-
-			["Amount"] = function(Label)
-				if Label:IsA("Frame") then
-					Label.BackgroundColor3 = Theme.Interactables
-				end
-			end,
-
-			["Slide"] = function(Label)
-				if Label:IsA("Frame") then
-					Label.BackgroundColor3 = Theme.Interactables
-				end
-			end,
-
-			["Input"] = function(Label)
-				if Label:IsA("TextLabel") then
-					Label.TextColor3 = Theme.Title
-				elseif Label:FindFirstChild("Labels") then
-					Label.BackgroundColor3 = Theme.Component
-				elseif Label:IsA("TextBox") and Label.Parent.Name == "Main" then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-
-			["Outline"] = function(Stroke)
-				if Stroke:IsA("UIStroke") then
-					Stroke.Color = Theme.Outline
-				end
-			end,
-
-			["DropdownExample"] = function(Label)
-				Label.BackgroundColor3 = Theme.Secondary
-			end,
-
-			["Underline"] = function(Label)
-				if Label:IsA("Frame") then
-					Label.BackgroundColor3 = Theme.Outline
-				end
-			end,
-		},
-
-		Classes = {
-			["ImageLabel"] = function(Label)
-				if Label.Image ~= "rbxassetid://6644618143" then
-					Label.ImageColor3 = Theme.Icon
-				end
-			end,
-
-			["TextLabel"] = function(Label)
-				if Label:FindFirstChild("Padding") then
-					Label.TextColor3 = Theme.Title
-				end
-			end,
-
-			["TextButton"] = function(Label)
-				if Label:FindFirstChild("Labels") then
-					Label.BackgroundColor3 = Theme.Component
-				end
-			end,
-
-			["ScrollingFrame"] = function(Label)
-				Label.ScrollBarImageColor3 = Theme.Component
-			end,
-		},
-	}
-
-	function Options:SetTheme(Info)
-		Theme = Info or Theme
-
-		Window.BackgroundColor3 = Theme.Primary
-		Holder.BackgroundColor3 = Theme.Secondary
-		Window.UIStroke.Color = Theme.Shadow
-
-		for Index, Descendant in next, Screen:GetDescendants() do
-			local Name, Class =  Themes.Names[Descendant.Name],  Themes.Classes[Descendant.ClassName]
-
-			if Name then
-				Name(Descendant);
-			elseif Class then
-				Class(Descendant);
-			end
-		end
-	end
-
-	--// Changing Settings
-
-	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme
-		if Setting == "Size" then
-			
-			Window.Size = Value
-			Setup.Size = Value
-			
-		elseif Setting == "Transparency" then
-			
-			Window.GroupTransparency = Value
-			Setup.Transparency = Value
-			
-			for Index, Notification in next, Screen:GetDescendants() do
-				if Notification:IsA("CanvasGroup") and Notification.Name == "Notification" then
-					Notification.GroupTransparency = Value
-				end
-			end
-			
-		elseif Setting == "Blur" then
-			
-			local AlreadyBlurred, Root = Blurs[Settings.Title], nil
-			
-			if AlreadyBlurred then
-				Root = Blurs[Settings.Title]["root"]
-			end
-			
-			if Value then
-				BlurEnabled = true
-
-				if not AlreadyBlurred or not Root then
-					Blurs[Settings.Title] = Blur.new(Window, 5)
-				elseif Root and not Root.Parent then
-					Root.Parent = workspace.CurrentCamera
-				end
-			elseif not Value and (AlreadyBlurred and Root and Root.Parent) then
-				Root.Parent = nil
-				BlurEnabled = false
-			end
-			
-		elseif Setting == "Theme" and typeof(Value) == "table" then
-			
-			Options:SetTheme(Value)
-			
-		elseif Setting == "Keybind" then
-			
-			Setup.Keybind = Value
-			
-		else
-			warn("Tried to change a setting that doesn't exist or isn't available to change.")
-		end
-	end
-
-	SetProperty(Window, { Size = Settings.Size, Visible = true, Parent = Screen });
-	Animations:Open(Window, Settings.Transparency or 0)
-
-	return Options
-end
-
-return Library
+							if 
