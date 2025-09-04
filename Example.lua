@@ -25,7 +25,7 @@ Window:AddTabSection({
 -- Add a tab
 local MainTab = Window:AddTab({
 	Title = "Main",
-	Icon = "6034835819", -- Example icon (uses FormatImageId)
+	Icon = "98837139268386", -- Example icon (uses FormatImageId)
 	Section = "MainSection"
 })
 
