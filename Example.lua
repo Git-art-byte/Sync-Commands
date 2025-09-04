@@ -4,11 +4,11 @@
 ]]
 
 -- Load the UI library using loadstring
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))() -- Replace with actual URL to Source.lua
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Git-art-byte/Sync-Commands/main/Source.lua"))() -- Ensure this points to the updated Source.lua
 
 -- Create a window with Void theme
 local Window = Library:CreateWindow({
-	Title = "UI Library Test",
+	Title = "UI Library Demo",
 	Size = UDim2.new(0, 600, 0, 400),
 	Transparency = 0.2,
 	MinimizeKeybind = Enum.KeyCode.LeftControl,
@@ -37,7 +37,7 @@ Window:AddDropdown({
 		["Gotham Bold"] = Enum.Font.GothamBold,
 		["Roboto"] = Enum.Font.Roboto,
 		["Arial"] = Enum.Font.Arial,
-		["Sarpanch"] = Enum.Font.Sarpanch	
+		["Sarpanch"] = Enum.Font.Sarpanch
 	},
 	Tab = MainTab,
 	Callback = function(Font)
@@ -174,7 +174,7 @@ Window:AddSlider({
 -- Add a paragraph
 Window:AddParagraph({
 	Title = "About",
-	Description = "This is a test UI to demonstrate all features of the UI library, including buttons, inputs, toggles, keybinds, dropdowns, sliders, and notifications. For educational purposes only.",
+	Description = "This is a demo UI to showcase the UI library's features, including buttons, inputs, toggles, keybinds, dropdowns, sliders, and notifications. For educational purposes only.",
 	Tab = MainTab
 })
 
@@ -185,4 +185,4 @@ Window:Notify({
 	Duration = 5
 })
 
-print("UI Library loaded with Void theme")
+print("UI Library Demo loaded with Void theme")
