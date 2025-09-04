@@ -1,0 +1,1421 @@
+--[[
+	User Interface Library for Exploits
+	Made by Late
+	Updated with Gotham Bold Font
+	Updated with Roblox Image/Decal ID Support
+	Updated with Dropdown Theme Colors
+	Updated to reduce slider notification spam
+	Updated to ensure window control buttons retain colors and hide UIStroke
+]]
+
+--// Connections
+local GetService = game.GetService
+local Connect = function(signal, callback) return signal:Connect(callback) end
+local Wait = function(obj) return obj:Wait() end
+local Clone = function(obj) return obj:Clone() end
+local Destroy = function(obj) return obj:Destroy() end
+
+if (not game:IsLoaded()) then
+	local Loaded = game.Loaded
+	Loaded:Wait();
+end
+
+--// Important 
+local Setup = {
+	Keybind = Enum.KeyCode.LeftControl,
+	Transparency = 0.2,
+	ThemeMode = "Void",
+	Size = nil,
+	Font = Enum.Font.GothamBold,
+	DropdownColor = nil, -- Custom dropdown color override
+}
+
+local Theme = { --// (Dark Theme)
+	--// Frames:
+	Primary = Color3.fromRGB(30, 30, 30),
+	Secondary = Color3.fromRGB(35, 35, 35),
+	Component = Color3.fromRGB(40, 40, 40),
+	Interactables = Color3.fromRGB(45, 45, 45),
+
+	--// Text:
+	Tab = Color3.fromRGB(200, 200, 200),
+	Title = Color3.fromRGB(240,240,240),
+	Description = Color3.fromRGB(200,200,200),
+
+	--// Outlines:
+	Shadow = Color3.fromRGB(0, 0, 0),
+	Outline = Color3.fromRGB(40, 40, 40),
+
+	--// Image:
+	Icon = Color3.fromRGB(220, 220, 220),
+	
+	--// Dropdown specific colors
+	DropdownPrimary = Color3.fromRGB(30, 30, 30),
+	DropdownSecondary = Color3.fromRGB(35, 35, 35),
+	DropdownAccent = Color3.fromRGB(153, 155, 255),
+}
+
+--// Theme Presets
+local ThemePresets = {
+	Dark = {
+		Primary = Color3.fromRGB(30, 30, 30),
+		Secondary = Color3.fromRGB(35, 35, 35),
+		Component = Color3.fromRGB(40, 40, 40),
+		Interactables = Color3.fromRGB(45, 45, 45),
+		Tab = Color3.fromRGB(200, 200, 200),
+		Title = Color3.fromRGB(240,240,240),
+		Description = Color3.fromRGB(200,200,200),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Outline = Color3.fromRGB(40, 40, 40),
+		Icon = Color3.fromRGB(220, 220, 220),
+		DropdownPrimary = Color3.fromRGB(30, 30, 30),
+		DropdownSecondary = Color3.fromRGB(35, 35, 35),
+		DropdownAccent = Color3.fromRGB(153, 155, 255),
+	},
+	
+	Light = {
+		Primary = Color3.fromRGB(232, 232, 232),
+		Secondary = Color3.fromRGB(255, 255, 255),
+		Component = Color3.fromRGB(245, 245, 245),
+		Interactables = Color3.fromRGB(235, 235, 235),
+		Tab = Color3.fromRGB(50, 50, 50),
+		Title = Color3.fromRGB(0, 0, 0),
+		Description = Color3.fromRGB(100, 100, 100),
+		Shadow = Color3.fromRGB(255, 255, 255),
+		Outline = Color3.fromRGB(210, 210, 210),
+		Icon = Color3.fromRGB(100, 100, 100),
+		DropdownPrimary = Color3.fromRGB(255, 255, 255),
+		DropdownSecondary = Color3.fromRGB(245, 245, 245),
+		DropdownAccent = Color3.fromRGB(100, 120, 255),
+	},
+	
+	Void = {
+		Primary = Color3.fromRGB(15, 15, 15),
+		Secondary = Color3.fromRGB(20, 20, 20),
+		Component = Color3.fromRGB(25, 25, 25),
+		Interactables = Color3.fromRGB(30, 30, 30),
+		Tab = Color3.fromRGB(200, 200, 200),
+		Title = Color3.fromRGB(240,240,240),
+		Description = Color3.fromRGB(200,200,200),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Outline = Color3.fromRGB(40, 40, 40),
+		Icon = Color3.fromRGB(220, 220, 220),
+		DropdownPrimary = Color3.fromRGB(15, 15, 15),
+		DropdownSecondary = Color3.fromRGB(20, 20, 20),
+		DropdownAccent = Color3.fromRGB(120, 100, 255),
+	}
+}
+
+--// Services & Functions
+local Type, Blur = nil, nil
+local LocalPlayer = GetService(game, "Players").LocalPlayer;
+local Services = {
+	Insert = GetService(game, "InsertService");
+	Tween = GetService(game, "TweenService");
+	Run = GetService(game, "RunService");
+	Input = GetService(game, "UserInputService");
+}
+
+local Player = {
+	Mouse = LocalPlayer:GetMouse();
+	GUI = LocalPlayer.PlayerGui;
+}
+
+-- Function to format image ID for Roblox
+local function FormatImageId(imageId)
+	if type(imageId) == "string" then
+		-- If it already contains rbxassetid:// or http, return as is
+		if imageId:find("rbxassetid://") or imageId:find("http") then
+			return imageId
+		end
+		-- If it's just numbers, add rbxassetid://
+		if imageId:match("^%d+$") then
+			return "rbxassetid://" .. imageId
+		end
+		-- If it contains other characters, assume it's already formatted
+		return imageId
+	elseif type(imageId) == "number" then
+		-- If it's a number, convert to rbxassetid format
+		return "rbxassetid://" .. tostring(imageId)
+	end
+	
+	-- Fallback to a default icon if something goes wrong
+	return "rbxassetid://0"
+end
+
+local Tween = function(Object : Instance, Speed : number, Properties : {},  Info : { EasingStyle: Enum?, EasingDirection: Enum? })
+	local Style, Direction
+
+	if Info then
+		Style, Direction = Info["EasingStyle"], Info["EasingDirection"]
+	else
+		Style, Direction = Enum.EasingStyle.Sine, Enum.EasingDirection.Out
+	end
+
+	return Services.Tween:Create(Object, TweenInfo.new(Speed, Style, Direction), Properties):Play()
+end
+
+local SetProperty = function(Object: Instance, Properties: {})
+	for Index, Property in next, Properties do
+		Object[Index] = (Property);
+	end
+
+	-- Auto-apply current font to all text objects
+	if Object:IsA("TextLabel") or Object:IsA("TextButton") or Object:IsA("TextBox") then
+		Object.Font = Setup.Font or Enum.Font.GothamBold
+	end
+
+	return Object
+end
+
+local Multiply = function(Value, Amount)
+	local New = {
+		Value.X.Scale * Amount;
+		Value.X.Offset * Amount;
+		Value.Y.Scale * Amount;
+		Value.Y.Offset * Amount;
+	}
+
+	return UDim2.new(unpack(New))
+end
+
+local Color = function(Color, Factor, Mode)
+	Mode = Mode or Setup.ThemeMode
+	if Mode == "Light" then
+		return Color3.fromRGB((Color.R * 255) - Factor, (Color.G * 255) - Factor, (Color.B * 255) - Factor)
+	elseif Mode == "Void" then
+		return Color -- Use Theme colors directly for Void
+	else
+		return Color3.fromRGB((Color.R * 255) + Factor, (Color.G * 255) + Factor, (Color.B * 255) + Factor)
+	end
+end
+
+local Drag = function(Canvas)
+	if Canvas then
+		local Dragging;
+		local DragInput;
+		local Start;
+		local StartPosition;
+
+		local function Update(input)
+			local delta = input.Position - Start
+			Canvas.Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + delta.Y)
+		end
+
+		Connect(Canvas.InputBegan, function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch and not Type then
+				Dragging = true
+				Start = Input.Position
+				StartPosition = Canvas.Position
+
+				Connect(Input.Changed, function()
+					if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+					end
+				end)
+			end
+		end)
+
+		Connect(Canvas.InputChanged, function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch and not Type then
+				DragInput = Input
+			end
+		end)
+
+		Connect(Services.Input.InputChanged, function(Input)
+			if Input == DragInput and Dragging and not Type then
+				Update(Input)
+			end
+		end)
+	end
+end
+
+local Resizing = { 
+	TopLeft = { X = Vector2.new(-1, 0),   Y = Vector2.new(0, -1)};
+	TopRight = { X = Vector2.new(1, 0),    Y = Vector2.new(0, -1)};
+	BottomLeft = { X = Vector2.new(-1, 0),   Y = Vector2.new(0, 1)};
+	BottomRight = { X = Vector2.new(1, 0),    Y = Vector2.new(0, 1)};
+}
+
+local Resizeable = function(Tab, Minimum, Maximum)
+	task.spawn(function()
+		local MousePos, Size, UIPos = nil, nil, nil
+
+		if Tab and Tab:FindFirstChild("Resize") then
+			local Positions = Tab:FindFirstChild("Resize")
+
+			for Index, Types in next, Positions:GetChildren() do
+				Connect(Types.InputBegan, function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						Type = Types
+						MousePos = Vector2.new(Player.Mouse.X, Player.Mouse.Y)
+						Size = Tab.AbsoluteSize
+						UIPos = Tab.Position
+					end
+				end)
+
+				Connect(Types.InputEnded, function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						Type = nil
+					end
+				end)
+			end
+		end
+
+		local Resize = function(Delta)
+			if Type and MousePos and Size and UIPos and Tab:FindFirstChild("Resize")[Type.Name] == Type then
+				local Mode = Resizing[Type.Name]
+				local NewSize = Vector2.new(Size.X + Delta.X * Mode.X.X, Size.Y + Delta.Y * Mode.Y.Y)
+				NewSize = Vector2.new(math.clamp(NewSize.X, Minimum.X, Maximum.X), math.clamp(NewSize.Y, Minimum.Y, Maximum.Y))
+
+				local AnchorOffset = Vector2.new(Tab.AnchorPoint.X * Size.X, Tab.AnchorPoint.Y * Size.Y)
+				local NewAnchorOffset = Vector2.new(Tab.AnchorPoint.X * NewSize.X, Tab.AnchorPoint.Y * NewSize.Y)
+				local DeltaAnchorOffset = NewAnchorOffset - AnchorOffset
+
+				Tab.Size = UDim2.new(0, NewSize.X, 0, NewSize.Y)
+
+				local NewPosition = UDim2.new(
+					UIPos.X.Scale, 
+					UIPos.X.Offset + DeltaAnchorOffset.X * Mode.X.X,
+					UIPos.Y.Scale,
+					UIPos.Y.Offset + DeltaAnchorOffset.Y * Mode.Y.Y
+				)
+				Tab.Position = NewPosition
+			end
+		end
+
+		Connect(Player.Mouse.Move, function()
+			if Type then
+				Resize(Vector2.new(Player.Mouse.X, Player.Mouse.Y) - MousePos)
+			end
+		end)
+	end)
+end
+
+--// Setup [UI] - Exploit version
+local Screen
+if identifyexecutor then
+    -- For exploits, use InsertService to load the UI
+    Screen = Services.Insert:LoadLocalAsset("rbxassetid://18490507748") -- Replace with your UI asset ID
+    
+    -- Simple blur effect for exploits
+    Blur = {
+        new = function(window, intensity)
+            local blur = Instance.new("BlurEffect")
+            blur.Size = intensity
+            blur.Parent = game:GetService("Lighting")
+            return {root = blur}
+        end
+    }
+else
+    -- For studio/real game
+    Screen = (script.Parent);
+    Blur = require(script.Blur)
+end
+
+Screen.Main.Visible = false
+
+-- Parent to CoreGui for exploits
+xpcall(function()
+	Screen.Parent = game:GetService("CoreGui")
+end, function() 
+	Screen.Parent = Player.GUI
+end)
+
+--// Tables for Data
+local Animations = {}
+local Blurs = {}
+local Components = (Screen:FindFirstChild("Components"));
+local Library = {};
+local StoredInfo = {
+	["Sections"] = {};
+	["Tabs"] = {}
+};
+
+--// Animations [Window]
+function Animations:Open(Window: CanvasGroup, Transparency: number, UseCurrentSize: boolean)
+	local Original = (UseCurrentSize and Window.Size) or Setup.Size
+	local Multiplied = Multiply(Original, 1.1)
+	local Shadow = Window:FindFirstChildOfClass("UIStroke")
+
+	SetProperty(Shadow, { Transparency = 1 })
+	SetProperty(Window, {
+		Size = Multiplied,
+		GroupTransparency = 1,
+		Visible = true,
+	})
+
+	Tween(Shadow, .25, { Transparency = 0.5 })
+	Tween(Window, .25, {
+		Size = Original,
+		GroupTransparency = Transparency or 0,
+	})
+end
+
+function Animations:Close(Window: CanvasGroup)
+	local Original = Window.Size
+	local Multiplied = Multiply(Original, 1.1)
+	local Shadow = Window:FindFirstChildOfClass("UIStroke")
+
+	SetProperty(Window, {
+		Size = Original,
+	})
+
+	Tween(Shadow, .25, { Transparency = 1 })
+	Tween(Window, .25, {
+		Size = Multiplied,
+		GroupTransparency = 1,
+	})
+
+	task.wait(.25)
+	Window.Size = Original
+	Window.Visible = false
+end
+
+function Animations:Component(Component: any, Custom: boolean)	
+	Connect(Component.InputBegan, function() 
+		if Custom then
+			Tween(Component, .25, { Transparency = .85 });
+		else
+			Tween(Component, .25, { BackgroundColor3 = Color(Theme.Component, 5, Setup.ThemeMode) });
+		end
+	end)
+
+	Connect(Component.InputEnded, function() 
+		if Custom then
+			Tween(Component, .25, { Transparency = 1 });
+		else
+			Tween(Component, .25, { BackgroundColor3 = Theme.Component });
+		end
+	end)
+end
+
+--// Themes Table
+local Themes = {
+	Names = {
+		["Paragraph"] = function(Label)
+			if Label:IsA("TextButton") then
+				Label.BackgroundColor3 = Color(Theme.Component, 5, "Dark");
+			end
+		end,
+		
+		["Title"] = function(Label)
+			if Label:IsA("TextLabel") then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["Description"] = function(Label)
+			if Label:IsA("TextLabel") then
+				Label.TextColor3 = Theme.Description
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+		
+		["Section"] = function(Label)
+			if Label:IsA("TextLabel") then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["Options"] = function(Label)
+			if Label:IsA("TextLabel") and Label.Parent.Name == "Main" then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+		
+		["Notification"] = function(Label)
+			if Label:IsA("CanvasGroup") then
+				Label.BackgroundColor3 = Theme.Primary
+				Label.UIStroke.Color = Theme.Outline
+			end
+		end,
+
+		["TextLabel"] = function(Label)
+			if Label:IsA("TextLabel") and Label.Parent:FindFirstChild("List") then
+				Label.TextColor3 = Theme.Tab
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["Close"] = function(Button)
+			if Button:IsA("TextButton") then
+				Button.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Always red
+				Button.BackgroundTransparency = 0
+				local Stroke = Button:FindFirstChildOfClass("UIStroke")
+				if Stroke then
+					Stroke.Transparency = 1 -- Hide UIStroke
+					print("Themes.Names.Close: Set UIStroke Transparency to 1") -- Debug
+				end
+				print("Themes.Names.Close: Applied BackgroundColor3: " .. tostring(Button.BackgroundColor3)) -- Debug
+			end
+		end,
+		
+		["Minimize"] = function(Button)
+			if Button:IsA("TextButton") then
+				Button.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Always yellow
+				Button.BackgroundTransparency = 0
+				local Stroke = Button:FindFirstChildOfClass("UIStroke")
+				if Stroke then
+					Stroke.Transparency = 1 -- Hide UIStroke
+					print("Themes.Names.Minimize: Set UIStroke Transparency to 1") -- Debug
+				end
+				print("Themes.Names.Minimize: Applied BackgroundColor3: " .. tostring(Button.BackgroundColor3)) -- Debug
+			end
+		end,
+		
+		["Maximize"] = function(Button)
+			if Button:IsA("TextButton") then
+				Button.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Always green
+				Button.BackgroundTransparency = 0
+				local Stroke = Button:FindFirstChildOfClass("UIStroke")
+				if Stroke then
+					Stroke.Transparency = 1 -- Hide UIStroke
+					print("Themes.Names.Maximize: Set UIStroke Transparency to 1") -- Debug
+				end
+				print("Themes.Names.Maximize: Applied BackgroundColor3: " .. tostring(Button.BackgroundColor3)) -- Debug
+			end
+		end,
+
+		["Main"] = function(Label)
+			if Label:IsA("Frame") then
+				if Label.Parent == Window then
+					Label.BackgroundColor3 = Theme.Secondary
+				elseif Label.Parent:FindFirstChild("Value") then
+					local Toggle = Label.Parent.Value 
+					local Circle = Label:FindFirstChild("Circle")
+					
+					if not Toggle.Value then
+						Label.BackgroundColor3 = Theme.Interactables
+						Label.Circle.BackgroundColor3 = Theme.Primary
+					end
+				else
+					Label.BackgroundColor3 = Theme.Interactables
+				end
+			elseif Label:FindFirstChild("Padding") then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["Amount"] = function(Label)
+			if Label:IsA("Frame") then
+				Label.BackgroundColor3 = Theme.Interactables
+			end
+		end,
+
+		["Slide"] = function(Label)
+			if Label:IsA("Frame") then
+				Label.BackgroundColor3 = Theme.Interactables
+			end
+		end,
+
+		["Input"] = function(Label)
+			if Label:IsA("TextLabel") then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			elseif Label:FindFirstChild("Labels") then
+				Label.BackgroundColor3 = Theme.Component
+			elseif Label:IsA("TextBox") and Label.Parent.Name == "Main" then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["Outline"] = function(Stroke)
+			if Stroke:IsA("UIStroke") then
+				-- Skip window control buttons to prevent UIStroke color override
+				if Stroke.Parent and (Stroke.Parent.Name == "Close" or Stroke.Parent.Name == "Minimize" or Stroke.Parent.Name == "Maximize") then
+					Stroke.Transparency = 1 -- Ensure UIStroke is hidden
+					print("Themes.Names.Outline: Skipped " .. Stroke.Parent.Name .. ", set UIStroke Transparency to 1") -- Debug
+				else
+					Stroke.Color = Theme.Outline
+					Stroke.Transparency = 0 -- Ensure visibility for other elements
+					print("Themes.Names.Outline: Applied color to " .. Stroke.Parent.Name .. ": " .. tostring(Theme.Outline)) -- Debug
+				end
+			end
+		end,
+
+		["DropdownExample"] = function(Label)
+			Label.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Primary) or Theme.DropdownPrimary
+		end,
+
+		["Underline"] = function(Label)
+			if Label:IsA("Frame") then
+				Label.BackgroundColor3 = Theme.Outline
+			end
+		end,
+	},
+
+	Classes = {
+		["ImageLabel"] = function(Label)
+			Label.ImageColor3 = Theme.Icon
+		end,
+
+		["TextLabel"] = function(Label)
+			if Label:FindFirstChild("Padding") then
+				Label.TextColor3 = Theme.Title
+				Label.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end,
+
+		["TextButton"] = function(Label)
+			-- Check if the button is a window control button by name
+			if Label.Name == "Close" or Label.Name == "Minimize" or Label.Name == "Maximize" then
+				-- Apply specific colors to BackgroundColor3 and hide UIStroke
+				if Label.Name == "Close" then
+					Label.BackgroundColor3 = Color3.fromRGB(255, 96, 92) -- Red
+					Label.BackgroundTransparency = 0
+					local Stroke = Label:FindFirstChildOfClass("UIStroke")
+					if Stroke then
+						Stroke.Transparency = 1 -- Hide UIStroke
+						print("TextButton class: Set Close UIStroke Transparency to 1") -- Debug
+					end
+					print("TextButton class: Applied Close BackgroundColor3: " .. tostring(Label.BackgroundColor3)) -- Debug
+				elseif Label.Name == "Minimize" then
+					Label.BackgroundColor3 = Color3.fromRGB(255, 189, 68) -- Yellow
+					Label.BackgroundTransparency = 0
+					local Stroke = Label:FindFirstChildOfClass("UIStroke")
+					if Stroke then
+						Stroke.Transparency = 1 -- Hide UIStroke
+						print("TextButton class: Set Minimize UIStroke Transparency to 1") -- Debug
+					end
+					print("TextButton class: Applied Minimize BackgroundColor3: " .. tostring(Label.BackgroundColor3)) -- Debug
+				elseif Label.Name == "Maximize" then
+					Label.BackgroundColor3 = Color3.fromRGB(39, 201, 63) -- Green
+					Label.BackgroundTransparency = 0
+					local Stroke = Label:FindFirstChildOfClass("UIStroke")
+					if Stroke then
+						Stroke.Transparency = 1 -- Hide UIStroke
+						print("TextButton class: Set Maximize UIStroke Transparency to 1") -- Debug
+					end
+					print("TextButton class: Applied Maximize BackgroundColor3: " .. tostring(Label.BackgroundColor3)) -- Debug
+				end
+				return -- Skip further styling
+			end
+			
+			-- Apply default TextButton styling for non-window buttons
+			if Label:FindFirstChild("Labels") then
+				Label.BackgroundColor3 = Theme.Component
+			elseif Label.Parent and Label.Parent.Name == "ScrollingFrame" and Label.Parent.Parent and Label.Parent.Parent.Name == "DropdownExample" then
+				-- Dropdown button styling
+				Label.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
+			else
+				Label.BackgroundColor3 = Theme.Component -- Fallback to prevent white
+			end
+			local Stroke = Label:FindFirstChildOfClass("UIStroke")
+			if Stroke then
+				Stroke.Color = Theme.Outline
+				Stroke.Transparency = 0 -- Ensure visibility for non-window buttons
+			end
+			Label.Font = Setup.Font or Enum.Font.GothamBold
+		end,
+
+		["TextBox"] = function(Label)
+			Label.Font = Setup.Font or Enum.Font.GothamBold
+		end,
+
+		["ScrollingFrame"] = function(Label)
+			Label.ScrollBarImageColor3 = Theme.Component
+		end,
+	},
+}
+
+--// Library [Window]
+function Library:CreateWindow(Settings: { Title: string, Size: UDim2, Transparency: number, MinimizeKeybind: Enum.KeyCode?, Blurring: boolean, Theme: string })
+	local Window = Clone(Screen:WaitForChild("Main"));
+	local Sidebar = Window:FindFirstChild("Sidebar");
+	local Holder = Window:FindFirstChild("Main");
+	local BG = Window:FindFirstChild("BackgroundShadow");
+	local Tab = Sidebar:FindFirstChild("Tab");
+
+	local Options = {};
+	local Examples = {};
+	local Opened = true;
+	local Maximized = false;
+	local BlurEnabled = false;
+
+	for Index, Example in next, Window:GetDescendants() do
+		if Example.Name:find("Example") and not Examples[Example.Name] then
+			Examples[Example.Name] = Example
+		end
+	end
+
+	-- Explicitly set window control button colors and hide UIStroke on initialization
+	for _, button in pairs(Sidebar.Top.Buttons:GetChildren()) do
+		if button:IsA("TextButton") then
+			local Stroke = button:FindFirstChildOfClass("UIStroke")
+			if button.Name == "Close" then
+				SetProperty(button, {
+					BackgroundColor3 = Color3.fromRGB(255, 96, 92), -- Red
+					BackgroundTransparency = 0
+				})
+				if Stroke then
+					SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+					print("CreateWindow: Initialized Close UIStroke Transparency to 1") -- Debug
+				end
+				print("CreateWindow: Initialized Close BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+			elseif button.Name == "Minimize" then
+				SetProperty(button, {
+					BackgroundColor3 = Color3.fromRGB(255, 189, 68), -- Yellow
+					BackgroundTransparency = 0
+				})
+				if Stroke then
+					SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+					print("CreateWindow: Initialized Minimize UIStroke Transparency to 1") -- Debug
+				end
+				print("CreateWindow: Initialized Minimize BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+			elseif button.Name == "Maximize" then
+				SetProperty(button, {
+					BackgroundColor3 = Color3.fromRGB(39, 201, 63), -- Green
+					BackgroundTransparency = 0
+				})
+				if Stroke then
+					SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+					print("CreateWindow: Initialized Maximize UIStroke Transparency to 1") -- Debug
+				end
+				print("CreateWindow: Initialized Maximize BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+			end
+		end
+	end
+	-- Force UI refresh after initialization
+	Window.Visible = false
+	task.wait(0.1)
+	Window.Visible = true
+
+	--// UI Blur & More
+	Drag(Window);
+	Resizeable(Window, Vector2.new(411, 271), Vector2.new(9e9, 9e9));
+	Setup.Transparency = Settings.Transparency or 0
+	Setup.Size = Settings.Size
+	Setup.ThemeMode = Settings.Theme or "Dark"
+
+	if Settings.Blurring then
+		Blurs[Settings.Title] = Blur.new(Window, 5)
+		BlurEnabled = true
+	end
+
+	if Settings.MinimizeKeybind then
+		Setup.Keybind = Settings.MinimizeKeybind
+	end
+
+	--// Animate
+	local Close = function()
+		if Opened then
+			if BlurEnabled then
+				Blurs[Settings.Title].root.Parent = nil
+			end
+
+			Opened = false
+			Animations:Close(Window)
+			Window.Visible = false
+		else
+			Animations:Open(Window, Setup.Transparency)
+			Opened = true
+
+			if BlurEnabled then
+				Blurs[Settings.Title].root.Parent = workspace.CurrentCamera
+			end
+		end
+	end
+
+	for Index, Button in next, Sidebar.Top.Buttons:GetChildren() do
+		if Button:IsA("TextButton") then
+			local Name = Button.Name
+			Animations:Component(Button, true)
+
+			Connect(Button.MouseButton1Click, function() 
+				if Name == "Close" then
+					Close()
+				elseif Name == "Maximize" then
+					if Maximized then
+						Maximized = false
+						Tween(Window, .15, { Size = Setup.Size });
+					else
+						Maximized = true
+						Tween(Window, .15, { Size = UDim2.fromScale(1, 1), Position = UDim2.fromScale(0.5, 0.5 )});
+					end
+				elseif Name == "Minimize" then
+					Opened = false
+					Window.Visible = false
+					if BlurEnabled then
+						Blurs[Settings.Title].root.Parent = nil
+					end
+				end
+			end)
+		end
+	end
+
+	Services.Input.InputBegan:Connect(function(Input, Focused) 
+		if (Input == Setup.Keybind or Input.KeyCode == Setup.Keybind) and not Focused then
+			Close()
+		end
+	end)
+
+	--// Tab Functions
+	function Options:SetTab(Name: string)
+		for Index, Button in next, Tab:GetChildren() do
+			if Button:IsA("TextButton") then
+				local Opened, SameName = Button.Value, (Button.Name == Name);
+				local Padding = Button:FindFirstChildOfClass("UIPadding");
+
+				if SameName and not Opened.Value then
+					Tween(Padding, .25, { PaddingLeft = UDim.new(0, 25) });
+					Tween(Button, .25, { BackgroundTransparency = 0.9, Size = UDim2.new(1, -15, 0, 30) });
+					SetProperty(Opened, { Value = true });
+				elseif not SameName and Opened.Value then
+					Tween(Padding, .25, { PaddingLeft = UDim.new(0, 20) });
+					Tween(Button, .25, { BackgroundTransparency = 1, Size = UDim2.new(1, -44, 0, 30) });
+					SetProperty(Opened, { Value = false });
+				end
+			end
+		end
+
+		for Index, Main in next, Holder:GetChildren() do
+			if Main:IsA("CanvasGroup") then
+				local Opened, SameName = Main.Value, (Main.Name == Name);
+				local Scroll = Main:FindFirstChild("ScrollingFrame");
+
+				if SameName and not Opened.Value then
+					Opened.Value = true
+					Main.Visible = true
+
+					Tween(Main, .3, { GroupTransparency = 0 });
+					Tween(Scroll["UIPadding"], .3, { PaddingTop = UDim.new(0, 5) });
+
+				elseif not SameName and Opened.Value then
+					Opened.Value = false
+
+					Tween(Main, .15, { GroupTransparency = 1 });
+					Tween(Scroll["UIPadding"], .15, { PaddingTop = UDim.new(0, 15) });	
+
+					task.delay(.2, function()
+						Main.Visible = false
+					end)
+				end
+			end
+		end
+	end
+
+	function Options:AddTabSection(Settings: { Name: string, Order: number })
+		local Example = Examples["SectionExample"];
+		local Section = Clone(Example);
+
+		StoredInfo["Sections"][Settings.Name] = (Settings.Order);
+		SetProperty(Section, { 
+			Parent = Example.Parent,
+			Text = Settings.Name,
+			Name = Settings.Name,
+			LayoutOrder = Settings.Order,
+			Visible = true
+		});
+	end
+
+	function Options:AddTab(Settings: { Title: string, Icon: string?, Section: string? })
+		if StoredInfo["Tabs"][Settings.Title] then 
+			error("[UI LIB]: A tab with the same name has already been created") 
+		end 
+
+		local Example, MainExample = Examples["TabButtonExample"], Examples["MainExample"];
+		local Section = StoredInfo["Sections"][Settings.Section];
+		local Main = Clone(MainExample);
+		local Tab = Clone(Example);
+
+		if not Settings.Icon then
+			-- Remove the icon if none provided
+			local IconElement = Tab:FindFirstChild("ICO")
+			if IconElement then
+				Destroy(IconElement);
+			end
+		else
+			-- Set the icon using Roblox image/decal ID
+			local IconElement = Tab:FindFirstChild("ICO")
+			if IconElement then
+				SetProperty(IconElement, { Image = FormatImageId(Settings.Icon) });
+			end
+		end
+
+		StoredInfo["Tabs"][Settings.Title] = { Tab }
+		SetProperty(Tab["TextLabel"], { Text = Settings.Title });
+
+		SetProperty(Main, { 
+			Parent = MainExample.Parent,
+			Name = Settings.Title;
+		});
+
+		SetProperty(Tab, { 
+			Parent = Example.Parent,
+			LayoutOrder = Section or #StoredInfo["Sections"] + 1,
+			Name = Settings.Title;
+			Visible = true;
+		});
+
+		Tab.MouseButton1Click:Connect(function()
+			Options:SetTab(Tab.Name);
+		end)
+
+		return Main.ScrollingFrame
+	end
+	
+	--// Notifications
+	function Options:Notify(Settings: { Title: string, Description: string, Duration: number }) 
+		local Notification = Clone(Components["Notification"]);
+		local Title, Description = Options:GetLabels(Notification);
+		local Timer = Notification["Timer"];
+		
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Notification, {
+			Parent = Screen["Frame"],
+		})
+		
+		task.spawn(function() 
+			local Duration = Settings.Duration or 2
+			local Wait = task.wait;
+			
+			Animations:Open(Notification, Setup.Transparency, true); Tween(Timer, Duration, { Size = UDim2.new(0, 0, 0, 4) });
+			Wait(Duration);
+			Animations:Close(Notification);
+			Wait(1);
+			Notification:Destroy();
+		end)
+	end
+
+	--// Component Functions
+	function Options:GetLabels(Component)
+		local Labels = Component:FindFirstChild("Labels")
+		return Labels.Title, Labels.Description
+	end
+
+	function Options:AddSection(Settings: { Name: string, Tab: Instance }) 
+		local Section = Clone(Components["Section"]);
+		SetProperty(Section, {
+			Text = Settings.Name,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+	
+	function Options:AddButton(Settings: { Title: string, Description: string, Tab: Instance, Callback: any }) 
+		local Button = Clone(Components["Button"]);
+		local Title, Description = Options:GetLabels(Button);
+
+		Connect(Button.MouseButton1Click, Settings.Callback)
+		Animations:Component(Button)
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Button, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:AddInput(Settings: { Title: string, Description: string, Tab: Instance, Callback: any }) 
+		local Input = Clone(Components["Input"]);
+		local Title, Description = Options:GetLabels(Input);
+		local TextBox = Input["Main"]["Input"];
+
+		Connect(Input.MouseButton1Click, function() 
+			TextBox:CaptureFocus()
+		end)
+
+		Connect(TextBox.FocusLost, function() 
+			Settings.Callback(TextBox.Text)
+		end)
+
+		Animations:Component(Input)
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Input, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:AddToggle(Settings: { Title: string, Description: string, Default: boolean, Tab: Instance, Callback: any }) 
+		local Toggle = Clone(Components["Toggle"]);
+		local Title, Description = Options:GetLabels(Toggle);
+
+		local On = Toggle["Value"];
+		local Main = Toggle["Main"];
+		local Circle = Main["Circle"];
+		
+		local Set = function(Value)
+			if Value then
+				Tween(Main, .2, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Accent) or Theme.DropdownAccent });
+				Tween(Circle, .2, { BackgroundColor3 = Color3.fromRGB(255, 255, 255), Position = UDim2.new(1, -16, 0.5, 0) });
+			else
+				Tween(Main, .2, { BackgroundColor3 = Theme.Interactables });
+				Tween(Circle, .2, { BackgroundColor3 = Theme.Primary, Position = UDim2.new(0, 3, 0.5, 0) });
+			end
+			
+			On.Value = Value
+		end 
+
+		Connect(Toggle.MouseButton1Click, function()
+			local Value = not On.Value
+			Set(Value)
+			Settings.Callback(Value)
+		end)
+
+		Animations:Component(Toggle);
+		Set(Settings.Default);
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Toggle, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+	
+	function Options:AddKeybind(Settings: { Title: string, Description: string, Tab: Instance, Callback: any }) 
+		local Dropdown = Clone(Components["Keybind"]);
+		local Title, Description = Options:GetLabels(Dropdown);
+		local Bind = Dropdown["Main"].Options;
+		
+		local Mouse = { Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3 }; 
+		local Types = { 
+			["Mouse"] = "Enum.UserInputType.MouseButton", 
+			["Key"] = "Enum.KeyCode." 
+		}
+		
+		Connect(Dropdown.MouseButton1Click, function()
+			local Time = tick();
+			local Detect, Finished
+			
+			SetProperty(Bind, { Text = "..." });
+			Detect = Connect(game.UserInputService.InputBegan, function(Key, Focused) 
+				local InputType = (Key.UserInputType);
+				
+				if not Finished and not Focused then
+					Finished = (true)
+					
+					if table.find(Mouse, InputType) then
+						Settings.Callback(Key);
+						SetProperty(Bind, {
+							Text = tostring(InputType):gsub(Types.Mouse, "MB")
+						})
+					elseif InputType == Enum.UserInputType.Keyboard then
+						Settings.Callback(Key);
+						SetProperty(Bind, {
+							Text = tostring(Key.KeyCode):gsub(Types.Key, "")
+						})
+					end
+				end
+			end)
+		end)
+
+		Animations:Component(Dropdown);
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Dropdown, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:AddDropdown(Settings: { Title: string, Description: string, Options: {}, Tab: Instance, Callback: any }) 
+		local Dropdown = Clone(Components["Dropdown"]);
+		local Title, Description = Options:GetLabels(Dropdown);
+		local Text = Dropdown["Main"].Options;
+
+		Connect(Dropdown.MouseButton1Click, function()
+			local Example = Clone(Examples["DropdownExample"]);
+			local Buttons = Example["Top"]["Buttons"];
+
+			-- Apply dropdown theme colors
+			SetProperty(Example, { 
+				BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Primary) or Theme.DropdownPrimary,
+				Parent = Window 
+			});
+			
+			-- Apply theme to dropdown outline
+			if Example:FindFirstChild("UIStroke") then
+				Example.UIStroke.Color = Theme.Outline
+			end
+
+			Tween(BG, .25, { BackgroundTransparency = 0.6 });
+			Animations:Open(Example, 0, true)
+
+			for Index, Button in next, Buttons:GetChildren() do
+				if Button:IsA("TextButton") then
+					Animations:Component(Button, true)
+
+					Connect(Button.MouseButton1Click, function()
+						Tween(BG, .25, { BackgroundTransparency = 1 });
+						Animations:Close(Example);
+						task.wait(2)
+						Destroy(Example);
+					end)
+				end
+			end
+
+			for Index, Option in next, Settings.Options do
+				local Button = Clone(Examples["DropdownButtonExample"]);
+				local Title, Description = Options:GetLabels(Button);
+				local Selected = Button["Value"];
+
+				-- Apply dropdown theme colors to buttons
+				Button.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
+
+				Animations:Component(Button);
+				SetProperty(Title, { Text = Index });
+				SetProperty(Button, { Parent = Example.ScrollingFrame, Visible = true });
+				Destroy(Description);
+
+				Connect(Button.MouseButton1Click, function() 
+					local NewValue = not Selected.Value 
+
+					if NewValue then
+						Tween(Button, .25, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Accent) or Theme.DropdownAccent });
+						Settings.Callback(Option)
+						Text.Text = Index
+
+						for _, Others in next, Example.ScrollingFrame:GetChildren() do
+							if Others:IsA("TextButton") and Others ~= Button then
+								Others.BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary
+							end
+						end
+					else
+						Tween(Button, .25, { BackgroundColor3 = (Setup.DropdownColor and Setup.DropdownColor.Secondary) or Theme.DropdownSecondary });
+					end
+
+					Selected.Value = NewValue
+					Tween(BG, .25, { BackgroundTransparency = 1 });
+					Animations:Close(Example);
+					task.wait(2)
+					Destroy(Example);
+				end)
+			end
+		end)
+
+		Animations:Component(Dropdown);
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Dropdown, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:AddSlider(Settings: { Title: string, Description: string, MaxValue: number, AllowDecimals: boolean, DecimalAmount: number, Tab: Instance, Callback: any }) 
+		local Slider = Clone(Components["Slider"]);
+		local Title, Description = Options:GetLabels(Slider);
+
+		local Main = Slider["Slider"];
+		local Amount = Main["Main"].Input;
+		local Slide = Main["Slide"];
+		local Fire = Slide["Fire"];
+		local Fill = Slide["Highlight"];
+		local Circle = Fill["Circle"];
+
+		local Active = false
+		local Value = 0
+		
+		local SetNumber = function(Number)
+			if Settings.AllowDecimals then
+				local Power = 10 ^ (Settings.DecimalAmount or 2)
+				Number = math.floor(Number * Power + 0.5) / Power
+			else
+				Number = math.round(Number)
+			end
+			
+			return Number
+		end
+
+		local Update = function(Number)
+			local Scale = (Player.Mouse.X - Slide.AbsolutePosition.X) / Slide.AbsoluteSize.X			
+			Scale = (Scale > 1 and 1) or (Scale < 0 and 0) or Scale
+			
+			if Number then
+				Number = (Number > Settings.MaxValue and Settings.MaxValue) or (Number < 0 and 0) or Number
+			end
+			
+			Value = SetNumber(Number or (Scale * Settings.MaxValue))
+			Amount.Text = Value
+			Fill.Size = UDim2.fromScale((Number and Number / Settings.MaxValue) or Scale, 1)
+		end
+
+		local Activate = function()
+			Active = true
+
+			repeat task.wait()
+				Update()
+			until not Active
+			
+			-- Call callback only when dragging ends
+			Settings.Callback(Value)
+		end
+		
+		Connect(Amount.FocusLost, function() 
+			local Number = tonumber(Amount.Text) or 0
+			Update(Number)
+			Settings.Callback(Number) -- Call callback on manual input
+		end)
+
+		Connect(Fire.MouseButton1Down, Activate)
+		Connect(Services.Input.InputEnded, function(Input) 
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+				Active = false
+			end
+		end)
+
+		Fill.Size = UDim2.fromScale(Value, 1);
+		Animations:Component(Slider);
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Slider, {
+			Name = Settings.Title,
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:AddParagraph(Settings: { Title: string, Description: string, Tab: Instance }) 
+		local Paragraph = Clone(Components["Paragraph"]);
+		local Title, Description = Options:GetLabels(Paragraph);
+
+		SetProperty(Title, { Text = Settings.Title });
+		SetProperty(Description, { Text = Settings.Description });
+		SetProperty(Paragraph, {
+			Parent = Settings.Tab,
+			Visible = true,
+		})
+	end
+
+	function Options:DropdownColor(themeName)
+		if type(themeName) == "string" and ThemePresets[themeName] then
+			local selectedTheme = ThemePresets[themeName]
+			Setup.DropdownColor = {
+				Primary = selectedTheme.DropdownPrimary,
+				Secondary = selectedTheme.DropdownSecondary,
+				Accent = selectedTheme.DropdownAccent
+			}
+			
+			-- Update existing dropdowns if any
+			for _, descendant in pairs(Window:GetDescendants()) do
+				if descendant.Name == "DropdownExample" and descendant:IsA("CanvasGroup") then
+					descendant.BackgroundColor3 = selectedTheme.DropdownPrimary
+					
+					-- Update dropdown buttons
+					for _, child in pairs(descendant:GetDescendants()) do
+						if child:IsA("TextButton") and child:FindFirstChild("Value") then
+							if child.Value.Value then
+								child.BackgroundColor3 = selectedTheme.DropdownAccent
+							else
+								child.BackgroundColor3 = selectedTheme.DropdownSecondary
+							end
+						end
+					end
+				end
+			end
+		else
+			warn("DropdownColor expects a theme name: 'Dark', 'Light', or 'Void'")
+		end
+	end
+
+	function Options:SetTheme(themeInfo)
+		-- Handle both string theme names and color tables
+		if type(themeInfo) == "string" then
+			-- String input - check if it's a built-in theme
+			if ThemePresets[themeInfo] then
+				Theme = ThemePresets[themeInfo]
+				Setup.ThemeMode = themeInfo
+			else
+				warn("Theme '" .. themeInfo .. "' not found! Using default Dark theme.")
+				Theme = ThemePresets["Dark"]
+				Setup.ThemeMode = "Dark"
+			end
+		elseif type(themeInfo) == "table" then
+			-- Table input - use custom theme, ensure dropdown colors exist
+			Theme = themeInfo
+			if not Theme.DropdownPrimary then
+				Theme.DropdownPrimary = Theme.Primary or Color3.fromRGB(30, 30, 30)
+			end
+			if not Theme.DropdownSecondary then
+				Theme.DropdownSecondary = Theme.Secondary or Color3.fromRGB(35, 35, 35)
+			end
+			if not Theme.DropdownAccent then
+				Theme.DropdownAccent = Color3.fromRGB(153, 155, 255)
+			end
+			Setup.ThemeMode = "Custom"
+		else
+			warn("Invalid theme input type. Using default Dark theme.")
+			Theme = ThemePresets["Dark"]
+			Setup.ThemeMode = "Dark"
+		end
+
+		-- Apply the theme to main window elements
+		Window.BackgroundColor3 = Theme.Primary
+		Holder.BackgroundColor3 = Theme.Secondary
+		Window.UIStroke.Color = Theme.Shadow
+
+		-- Ensure Themes table exists
+		if not Themes then
+			warn("Themes table is nil! Cannot apply theme styling.")
+			return
+		end
+
+		-- Apply theme to all descendants
+		for Index, Descendant in next, Screen:GetDescendants() do
+			local Name, Class = Themes.Names[Descendant.Name], Themes.Classes[Descendant.ClassName]
+			if Name then
+				Name(Descendant)
+			elseif Class then
+				Class(Descendant)
+			end
+		end
+		
+		-- Apply default background to all Frames and CanvasGroups to prevent white backgrounds
+		for _, descendant in pairs(Screen:GetDescendants()) do
+			if descendant:IsA("Frame") or descendant:IsA("CanvasGroup") then
+				if not (descendant.Name == "Close" or descendant.Name == "Minimize" or descendant.Name == "Maximize") then
+					descendant.BackgroundColor3 = Theme.Primary
+				end
+			end
+		end
+
+		-- Explicitly reapply window control button colors and hide UIStroke after theme application
+		for _, button in pairs(Sidebar.Top.Buttons:GetChildren()) do
+			if button:IsA("TextButton") then
+				local Stroke = button:FindFirstChildOfClass("UIStroke")
+				if button.Name == "Close" then
+					SetProperty(button, {
+						BackgroundColor3 = Color3.fromRGB(255, 96, 92), -- Red
+						BackgroundTransparency = 0
+					})
+					if Stroke then
+						SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+						print("SetTheme: Reapplied Close UIStroke Transparency to 1") -- Debug
+					end
+					print("SetTheme: Reapplied Close BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+				elseif button.Name == "Minimize" then
+					SetProperty(button, {
+						BackgroundColor3 = Color3.fromRGB(255, 189, 68), -- Yellow
+						BackgroundTransparency = 0
+					})
+					if Stroke then
+						SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+						print("SetTheme: Reapplied Minimize UIStroke Transparency to 1") -- Debug
+					end
+					print("SetTheme: Reapplied Minimize BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+				elseif button.Name == "Maximize" then
+					SetProperty(button, {
+						BackgroundColor3 = Color3.fromRGB(39, 201, 63), -- Green
+						BackgroundTransparency = 0
+					})
+					if Stroke then
+						SetProperty(Stroke, { Transparency = 1 }) -- Hide UIStroke
+						print("SetTheme: Reapplied Maximize UIStroke Transparency to 1") -- Debug
+					end
+					print("SetTheme: Reapplied Maximize BackgroundColor3: " .. tostring(button.BackgroundColor3)) -- Debug
+				end
+			end
+		end
+
+		-- Force UI refresh to ensure colors and UIStroke are applied in exploit environments
+		Window.Visible = false
+		task.wait(0.1) -- Increased delay for better compatibility
+		Window.Visible = true
+
+		print("Theme applied: " .. Setup.ThemeMode .. ", Primary = " .. tostring(Theme.Primary)) -- Debug
+	end
+
+	function Options:SetFont(fontType)
+		fontType = fontType or Enum.Font.GothamBold
+		Setup.Font = fontType
+		
+		-- Change font for all existing text objects
+		for Index, Descendant in next, Screen:GetDescendants() do
+			if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") or Descendant:IsA("TextBox") then
+				Descendant.Font = fontType
+			end
+		end
+
+		-- Force UI refresh
+		Window.Visible = false
+		task.wait()
+		Window.Visible = true
+
+		print("Font set to: " .. tostring(fontType)) -- Debug
+	end
+
+	function Options:SetSetting(Setting, Value) --// Available settings - Size, Transparency, Blur, Theme, Font, DropdownColor
+		if Setting == "Size" then
+			Window.Size = Value
+			Setup.Size = Value
+		elseif Setting == "Transparency" then
+			Window.GroupTransparency = Value
+			Setup.Transparency = Value
+			for Index, Notification in next, Screen:GetDescendants() do
+				if Notification:IsA("CanvasGroup") and Notification.Name == "Notification" then
+					Notification.GroupTransparency = Value
+				end
+			end
+		elseif Setting == "Blur" then
+			local AlreadyBlurred, Root = Blurs[Settings.Title], nil
+			if AlreadyBlurred then
+				Root = Blurs[Settings.Title]["root"]
+			end
+			if Value then
+				BlurEnabled = true
+				if not AlreadyBlurred or not Root then
+					Blurs[Settings.Title] = Blur.new(Window, 5)
+				elseif Root and not Root.Parent then
+					Root.Parent = workspace.CurrentCamera
+				end
+			elseif not Value and (AlreadyBlurred and Root and Root.Parent) then
+				Root.Parent = nil
+				BlurEnabled = false
+			end
+		elseif Setting == "Theme" then
+			Options:SetTheme(Value)
+		elseif Setting == "Font" then
+			Options:SetFont(Value)
+		elseif Setting == "Keybind" then
+			Setup.Keybind = Value
+		elseif Setting == "DropdownColor" then
+			Options:DropdownColor(Value)
+		else
+			warn("Tried to change a setting that doesn't exist or isn't available to change.")
+		end
+	end
+
+	-- Apply the initial theme
+	Options:SetTheme(Settings.Theme or "Dark")
+
+	SetProperty(Window, { Size = Settings.Size, Visible = true, Parent = Screen });
+	Animations:Open(Window, Settings.Transparency or 0)
+
+	return Options
+end
+
+-- Auto-font changer for existing and new objects
+task.spawn(function()
+	while Screen do
+		for _, obj in pairs(Screen:GetDescendants()) do
+			if (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) and obj.Font ~= (Setup.Font or Enum.Font.GothamBold) then
+				obj.Font = Setup.Font or Enum.Font.GothamBold
+			end
+		end
+		task.wait(1)
+	end
+end)
+
+-- Auto-apply font to new objects as they're created
+Screen.DescendantAdded:Connect(function(obj)
+	if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+		task.wait() -- Wait a frame for the object to fully initialize
+		obj.Font = Setup.Font or Enum.Font.GothamBold
+	end
+end)
+
+return Library
