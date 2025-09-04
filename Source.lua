@@ -1,7 +1,7 @@
 --[[
 	User Interface Library for Exploits
 	Made by Late
-	Updated with Gotham Bold Font
+	Updated with Gotham Bold Fontl
 	Updated with Roblox Image/Decal ID Support
 	Updated with Dropdown Theme Colors
 	Updated to reduce slider notification spam
